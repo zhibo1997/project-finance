@@ -1,58 +1,41 @@
 {
-  "name": "@enn/{{packageName.npmNameFormat}}",
+  "name": "baobiao",
   "private": true,
-  "author": "{{userInfo.userName}}",
-  "version": "0.0.1",
-  "repo": "{{gitlabDetail.fullPath}}",
-  "main": "dist/main.es.js",
-  "exports": {
-    ".": "./dist/main.es.js"
-  },
-  "types": "types/main.d.ts",
-  "files": [
-    "dist",
-    "types"
-  ],
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "cross-env LANG=zh_CN.utf8 TERM=xterm-256color fl-scripts dev --workspace",
-    "build": "cross-env fl-scripts build --hash-file js --hash-file css",
-    "preview": "cross-env ENV=DEV NODE_ENV=development PUBLIC_PATH=http://localhost:3000 BASE_PATH=/ fl-scripts build --hash-file js --hash-file css && npx web-dev-server --port 3000 --root-dir dist --app-index dist/index.html --open",
-    "add-dep": "cross-env fl-scripts add_dep_to_pages",
-    "exec": "cross-env fl-scripts run_command_on_pages",
-    "use-share-repo": "cross-env fl-scripts use_share_repo",
-    "delete-share-repo": "cross-env fl-scripts delete_submodule",
-    "create-page": "cross-env fl-scripts create_page",
-    "create-iframe-page": "cross-env fl-scripts create_iframe_page",
-    "move-page": "cross-env fl-scripts move_page",
-    "delete-page": "cross-env fl-scripts delete_page",
-    "ensure-menu-config": "cross-env fl-scripts ensure_menu_config",
-    "share-code:create": "cross-env fl-scripts share_code/create",
-    "share-code:use": "cross-env fl-scripts share_code/use"
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "check": "vue-tsc -b",
+    "lint": "eslint . --ext .ts,.vue",
+    "lint:fix": "eslint . --ext .ts,.vue --fix"
   },
   "dependencies": {
-    "@enn/ency-design-tokens": "^1.1.0",
-    "@enn/fl-iframe-vue-router-talker": "^0.1.10",
-    "@enn/fl-layout": "^0.1.90",
-    "@enn/fl-result": "^0.1.2",
-    "@enncloud/enn-auth-sdk": "^0.2.4",
-    "@enncloud/mdata-enn-auth-sdk": "^0.2.19",
-    "native-spa-route": "^0.2.21"
+    "clsx": "^2.1.1",
+    "echarts": "^6.0.0",
+    "lucide-vue-next": "^0.511.0",
+    "sass": "^1.97.3",
+    "tailwind-merge": "^3.3.0",
+    "vue": "^3.4.15",
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "@enn/fl-app-frame-side-menu": "^2.0.36",
-    "@enn/fl-scripts": "^0.1.62",
-    "@types/node": "^17.0.45",
-    "@web/dev-server": "^0.1.38",
-    "cross-env": "^7.0.3",
-    "zx": "^7.2.3"
-  },
-  "enpm": {
-    "overrides": {
-      "ws@^0": "^1"
-    }
-  },
-  "engines": {
-    "node": ">=16",
-    "install-node": "16"
+    "@types/node": "^22.15.30",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
+    "@vitejs/plugin-vue": "^5.0.3",
+    "@vue/runtime-dom": "^3.4.15",
+    "@vue/tsconfig": "^0.7.0",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.56.0",
+    "eslint-plugin-vue": "^9.20.1",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "~5.3.3",
+    "unplugin-vue-dev-locator": "^1.0.0",
+    "vite": "^5.0.12",
+    "vite-plugin-trae-solo-badge": "^1.0.0",
+    "vue-tsc": "^1.8.27"
   }
 }

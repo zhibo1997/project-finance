@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目资金看板</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <style>
+        /* Ant Design Color System */
+        :root {
+            --primary-color: #1677ff;
+            --success-color: #52c41a;
+            --warning-color: #faad14;
+            --error-color: #ff4d4f;
+            --text-primary: rgba(0, 0, 0, 0.88);
+            --text-secondary: rgba(0, 0, 0, 0.65);
+            --border-primary: #d9d9d9;
+            --bg-layout: #f5f5f5;
+        }
+
+        /* Custom Utilities matching Ant Design */
+        .text-primary { color: var(--primary-color); }
+        .bg-primary { background-color: var(--primary-color); }
+        .text-success { color: var(--success-color); }
+        .bg-success { background-color: var(--success-color); }
+        .text-warning { color: var(--warning-color); }
+        .bg-warning { background-color: var(--warning-color); }
+        .text-error { color: var(--error-color); }
+        .bg-error { background-color: var(--error-color); }
+        
+        .ant-tag-success {
+            background-color: #f6ffed;
+            border-color: #b7eb8f;
+            color: #52c41a;
+        }
+        
+        .ant-tag-warning {
+            background-color: #fffbe6;
+            border-color: #ffe58f;
+            color: #faad14;
+        }
+
+        body {
+            background-color: var(--bg-layout);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1677ff',
+                        success: '#52c41a',
+                        warning: '#faad14',
+                        error: '#ff4d4f',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen text-[#1D1D1F] selection:bg-gray-200 selection:text-gray-900">
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+        
+        <!-- 1. Header Section -->
+        <div id="header-container"></div>
+
+        <!-- 2. Summary Cards Section -->
+        <div id="metrics-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+        <!-- 3. Details / Charts Section -->
+        <div class="space-y-4">
+            <!-- Section Header & Toggle -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h2 class="text-lg font-semibold text-gray-900 tracking-tight flex items-center gap-2">
+                    <i data-lucide="briefcase" class="w-[18px] h-[18px] text-gray-500"></i>
+                    资金分析与明细
+                </h2>
+                
+                <!-- Toggle Control -->
+                <div class="bg-gray-200/50 p-1 rounded-lg flex items-center self-start sm:self-auto">
+                    <button id="btn-list" onclick="switchView('list')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 bg-white text-gray-900 shadow-sm">
+                        <i data-lucide="list" class="w-[14px] h-[14px]"></i>
+                        明细列表
+                    </button>
+                    <button id="btn-chart" onclick="switchView('chart')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 text-gray-500 hover:text-gray-700">
+                        <i data-lucide="layout-grid" class="w-[14px] h-[14px]"></i>
+                        可视化报表
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="min-h-[400px]">
+                <!-- List View -->
+                <div id="list-view" class="bg-white rounded-xl border border-gray-200/80 shadow-sm overflow-hidden fade-in">
+                    <div class="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50/50 border-b border-gray-100 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <div class="col-span-5 sm:col-span-4">预算科目</div>
+                        <div class="col-span-3 sm:col-span-3 text-right">预算额度</div>
+                        <div class="col-span-4 sm:col-span-3 text-right">实际支出</div>
+                        <div class="hidden sm:block sm:col-span-2 text-right">进度</div>
+                    </div>
+                    <div id="list-content" class="divide-y divide-gray-50"></div>
+                </div>
+
+                <!-- Charts View -->
+                <div id="charts-view" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in">
+                    <!-- Bar Chart -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200/80 shadow-sm">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                            <i data-lucide="layout-grid" class="w-4 h-4 text-gray-400"></i>
+                            预算执行对比 (Budget vs Actual)
+                        </h3>
+                        <div id="bar-chart" class="h-[300px] w-full"></div>
+                    </div>
+
+                    <!-- Pie Chart -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-200/80 shadow-sm flex flex-col">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-gray-400"></i>
+                            支出构成分析
+                        </h3>
+                        <div class="flex-1 min-h-[300px] relative">
+                            <div id="pie-chart" class="w-full h-full"></div>
+                            <!-- Center Text Overlay -->
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pr-24" style="z-index: 0;">
+                                <span class="text-xs text-gray-400">总支出</span>
+                                <span id="total-expense-label" class="text-lg font-bold text-gray-900"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Note Footer -->
+            <div class="flex items-start gap-2 text-xs text-gray-400 px-2 mt-4 max-w-3xl">
+                <i data-lucide="alert-circle" class="w-[14px] h-[14px] mt-0.5 shrink-0"></i>
+                <p>
+                    数据说明：项目收入为独立具体项目收入。业务成本预算包含除人工成本外的所有费用支出。如因项目调整导致预算变更，需重新补充立项审批单。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Mock Data ---
+        const PROJECT_DATA = {
+            basicInfo: {
+                projectName: "新奥智学-新引擎交付项目",
+                projectId: "XAZX-2025-12",
+                clientName: "新奥集团",
+                region: "安徽区域",
+                clientContact: "刘先生",
+                projectLead: "王建国",
+                teamMembers: ["张三", "李四", "王五", "赵六"],
+                status: "进行中",
+                updateDate: "2025-12-08"
+            },
+            summary: {
+                income: {
+                    amount: 850000,
+                    note: "项目收入为独立具体项目收入，如“新引擎”"
+                },
+                budget: {
+                    amount: 120000,
+                    note: "除人工成本外的所有费用支出"
+                }
+            },
+            categories: [
+                { 
+                    id: "cat_1", 
+                    name: "差旅费", 
+                    fullName: "差旅费支出类",
+                    budget: 30000, 
+                    expenses: [
+                        { amount: 1200, desc: "张三出差舟山交付交通费" },
+                        { amount: 400, desc: "舟山希尔顿住宿费" },
+                        { amount: 400, desc: "差旅补助" }
+                    ]
+                },
+                { 
+                    id: "cat_2", 
+                    name: "办公费", 
+                    fullName: "办公支出类",
+                    budget: 10000, 
+                    expenses: [
+                        { amount: 2100, desc: "采购打印纸、墨盒及交付物料" }
+                    ]
+                },
+                { 
+                    id: "cat_3", 
+                    name: "广告宣传", 
+                    fullName: "广告宣传支出类",
+                    budget: 20000, 
+                    expenses: [
+                        { amount: 5000, desc: "项目宣传册印制" }
+                    ]
+                },
+                { 
+                    id: "cat_4", 
+                    name: "会议费", 
+                    fullName: "会议支出类",
+                    budget: 15000, 
+                    expenses: [
+                        { amount: 8000, desc: "启动会场地租赁及茶歇" }
+                    ]
+                },
+                { 
+                    id: "cat_5", 
+                    name: "招待费", 
+                    fullName: "招待支出类",
+                    budget: 15000, 
+                    expenses: [
+                        { amount: 3500, desc: "客户高层午餐会" },
+                        { amount: 8900, desc: "阶段性汇报晚宴" }
+                    ]
+                },
+                { 
+                    id: "cat_6", 
+                    name: "运输费", 
+                    fullName: "运输支出类",
+                    budget: 5000, 
+                    expenses: []
+                },
+                { 
+                    id: "cat_7", 
+                    name: "公司经费", 
+                    fullName: "公司经费支出类",
+                    budget: 5000, 
+                    expenses: []
+                },
+                { 
+                    id: "cat_8", 
+                    name: "其他", 
+                    fullName: "其他支出类",
+                    budget: 20000, 
+                    expenses: [
+                        { amount: 2000, desc: "外部专家咨询费" }
+                    ]
+                }
+            ]
+        };
+
+        // --- Utilities ---
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('zh-CN', { 
+                style: 'currency', 
+                currency: 'CNY', 
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        };
+
+        const calculateCategoryTotal = (expenses) => {
+            return expenses.reduce((acc, curr) => acc + curr.amount, 0);
+        };
+
+        // --- Render Functions ---
+
+        function renderHeader() {
+            const info = PROJECT_DATA.basicInfo;
+            const container = document.getElementById('header-container');
+            
+            const membersHtml = info.teamMembers.map(member => `
+                <div class="w-7 h-7 rounded-full bg-white border border-gray-100 flex items-center justify-center text-[10px] font-medium text-gray-500 shadow-sm ring-1 ring-white" title="${member}">
+                    ${member[0]}
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+                    <div class="h-2 bg-gradient-to-r from-gray-800 to-gray-600"></div>
+                    <div class="p-6 sm:p-8">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                            <div class="space-y-4 flex-1">
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2.5 py-1 rounded-md ant-tag-success text-xs font-semibold tracking-wide">
+                                        ${info.status}
+                                    </span>
+                                    <span class="text-gray-400 text-xs font-mono tracking-wider">
+                                        ${info.projectId}
+                                    </span>
+                                </div>
+                                <div>
+                                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight leading-tight">
+                                        ${info.projectName}
+                                    </h1>
+                                    <div class="mt-2 flex items-center text-gray-500 text-sm gap-4">
+                                        <span class="flex items-center gap-1.5">
+                                            <i data-lucide="building-2" class="w-[14px] h-[14px]"></i>
+                                            ${info.clientName}
+                                        </span>
+                                        <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                        <span class="flex items-center gap-1.5">
+                                            <i data-lucide="calendar" class="w-[14px] h-[14px]"></i>
+                                            更新于 ${info.updateDate}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-4 min-w-[280px]">
+                                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100/50 flex items-center justify-between group hover:border-gray-200 transition-colors">
+                                    <div>
+                                        <div class="text-xs text-gray-400 mb-0.5">项目负责人</div>
+                                        <div class="text-sm font-semibold text-gray-900">${info.projectLead}</div>
+                                    </div>
+                                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 ring-2 ring-white">
+                                        ${info.projectLead[0]}
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between px-2">
+                                    <div class="text-xs text-gray-400">项目成员</div>
+                                    <div class="flex -space-x-2">
+                                        ${membersHtml}
+                                        <div class="w-7 h-7 rounded-full bg-gray-100 border border-white flex items-center justify-center text-[10px] text-gray-400">
+                                            +
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMetrics() {
+            const { summary, categories } = PROJECT_DATA;
+            const totalActual = categories.reduce((sum, cat) => sum + calculateCategoryTotal(cat.expenses), 0);
+            const totalBudget = summary.budget.amount;
+            const grossProfit = summary.income.amount - totalActual;
+            const profitRate = ((grossProfit / summary.income.amount) * 100).toFixed(1);
+
+            const container = document.getElementById('metrics-container');
+
+            // Card 1: Income
+            container.innerHTML += createMetricCard(
+                "项目总收入", 
+                formatCurrency(summary.income.amount), 
+                "wallet", 
+                "已确认合同金额", 
+                "neutral"
+            );
+
+            // Card 2: Budget
+            container.innerHTML += createMetricCard(
+                "业务成本预算", 
+                formatCurrency(totalBudget), 
+                "file-text", 
+                "不含人工成本", 
+                "neutral"
+            );
+
+            // Card 3: Actual
+            container.innerHTML += createMetricCard(
+                "实际支出", 
+                formatCurrency(totalActual), 
+                "credit-card", 
+                `${((totalActual/totalBudget)*100).toFixed(1)}% 预算消耗`, 
+                "dark"
+            );
+
+            // Card 4: Profit
+            container.innerHTML += createMetricCard(
+                "当前毛利", 
+                formatCurrency(grossProfit), 
+                "trending-up", 
+                `毛利率 ${profitRate}%`, 
+                "neutral",
+                profitRate
+            );
+            
+            // Update total expense label for pie chart
+            document.getElementById('total-expense-label').innerText = formatCurrency(totalActual);
+        }
+
+        function createMetricCard(label, value, icon, subValue, type, trend) {
+            const styles = {
+                neutral: "bg-white border-gray-200 text-gray-900",
+                dark: "bg-gray-900 border-gray-800 text-white",
+            };
+            
+            const iconBg = type === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-500';
+            const subText = type === 'dark' ? 'text-gray-500' : 'text-gray-400';
+            const labelColor = type === 'dark' ? 'text-gray-400' : 'text-gray-500';
+
+            let trendHtml = '';
+            if (trend) {
+                const trendClass = trend > 0 ? 'ant-tag-success' : 'ant-tag-warning';
+                trendHtml = `<span class="text-xs font-medium px-2 py-0.5 rounded-full ${trendClass}">${trend > 0 ? '+' : ''}${trend}%</span>`;
+            }
+
+            return `
+                <div class="relative p-5 rounded-xl border ${styles[type]} shadow-[0_2px_10px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_20px_rgba(0,0,0,0.04)] hover:-translate-y-0.5">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 rounded-lg ${iconBg}">
+                            <i data-lucide="${icon}" class="w-[18px] h-[18px]"></i>
+                        </div>
+                        ${trendHtml}
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium uppercase tracking-wider mb-1 ${labelColor}">
+                            ${label}
+                        </p>
+                        <h3 class="text-2xl font-bold tracking-tight tabular-nums">
+                            ${value}
+                        </h3>
+                        ${subValue ? `<p class="text-xs mt-2 leading-relaxed ${subText}">${subValue}</p>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderList() {
+            const container = document.getElementById('list-content');
+            const html = PROJECT_DATA.categories.map(item => {
+                const actualUsed = calculateCategoryTotal(item.expenses);
+                const progress = Math.min((actualUsed / item.budget) * 100, 100);
+                const isOverBudget = actualUsed > item.budget;
+                const progressColor = isOverBudget ? 'bg-error' : 'bg-gray-800';
+                const textColor = isOverBudget ? 'text-error' : 'text-gray-900';
+
+                return `
+                    <div class="group transition-colors hover:bg-gray-50/30 item-row">
+                        <div class="grid grid-cols-12 gap-4 py-4 px-6 items-center cursor-pointer" onclick="toggleRow(this)">
+                            <div class="col-span-5 sm:col-span-4 flex items-center gap-3">
+                                <button class="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200 arrow-icon">
+                                    <i data-lucide="chevron-down" class="w-[14px] h-[14px]"></i>
+                                </button>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">${item.name}</div>
+                                    <div class="text-[10px] text-gray-400 hidden sm:block">${item.fullName}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-span-3 sm:col-span-3 text-right text-sm text-gray-500 font-mono">
+                                ${formatCurrency(item.budget)}
+                            </div>
+                            
+                            <div class="col-span-4 sm:col-span-3 text-right">
+                                <div class="text-sm font-mono font-medium ${textColor}">
+                                    ${formatCurrency(actualUsed)}
+                                </div>
+                            </div>
+
+                            <div class="hidden sm:flex col-span-2 items-center justify-end gap-2">
+                                <div class="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full ${progressColor}" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="details-content hidden bg-gray-50/50 border-t border-gray-100 px-6 py-4">
+                            <div class="max-w-3xl ml-auto sm:mr-12">
+                                ${item.expenses.length > 0 ? `
+                                    <div class="space-y-2">
+                                        ${item.expenses.map(exp => `
+                                            <div class="flex justify-between items-center text-sm p-2 rounded hover:bg-white hover:shadow-sm transition-all border border-transparent hover:border-gray-100">
+                                                <span class="text-gray-600">${exp.desc}</span>
+                                                <span class="font-mono text-gray-900">${formatCurrency(exp.amount)}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : `
+                                    <div class="text-gray-400 text-xs italic py-2">本月暂无报销记录</div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+
+        function toggleRow(headerElement) {
+            const row = headerElement.closest('.item-row');
+            const content = row.querySelector('.details-content');
+            const arrow = row.querySelector('.arrow-icon');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                arrow.classList.add('rotate-180', 'bg-gray-100');
+            } else {
+                content.classList.add('hidden');
+                arrow.classList.remove('rotate-180', 'bg-gray-100');
+            }
+        }
+
+        function switchView(mode) {
+            const listView = document.getElementById('list-view');
+            const chartsView = document.getElementById('charts-view');
+            const btnList = document.getElementById('btn-list');
+            const btnChart = document.getElementById('btn-chart');
+
+            if (mode === 'list') {
+                listView.classList.remove('hidden');
+                chartsView.classList.add('hidden');
+                
+                btnList.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                btnList.classList.remove('text-gray-500', 'hover:text-gray-700');
+                
+                btnChart.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                btnChart.classList.add('text-gray-500', 'hover:text-gray-700');
+            } else {
+                listView.classList.add('hidden');
+                chartsView.classList.remove('hidden');
+                
+                btnChart.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                btnChart.classList.remove('text-gray-500', 'hover:text-gray-700');
+                
+                btnList.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                btnList.classList.add('text-gray-500', 'hover:text-gray-700');
+                
+                // Resize charts when they become visible
+                if (barChartInstance) barChartInstance.resize();
+                if (pieChartInstance) pieChartInstance.resize();
+            }
+        }
+
+        // --- Charts ---
+        let barChartInstance;
+        let pieChartInstance;
+
+        function initCharts() {
+            const { categories } = PROJECT_DATA;
+            
+            // Bar Data
+            const barData = categories.map(cat => ({
+                name: cat.name,
+                budget: cat.budget,
+                actual: calculateCategoryTotal(cat.expenses)
+            }));
+
+            // Pie Data
+            const pieData = categories.map(cat => ({
+                name: cat.name,
+                value: calculateCategoryTotal(cat.expenses)
+            })).filter(item => item.value > 0);
+
+            // Init Bar Chart
+            const barChartDom = document.getElementById('bar-chart');
+            barChartInstance = echarts.init(barChartDom);
+            const barOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: function (params) {
+                        let res = params[0].name + '<br/>';
+                        params.forEach(param => {
+                            res += param.marker + param.seriesName + ': ' + formatCurrency(param.value) + '<br/>';
+                        });
+                        return res;
+                    },
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    borderColor: '#f4f4f5',
+                    borderWidth: 1,
+                    textStyle: { color: '#333' },
+                    extraCssText: 'box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px;'
+                },
+                legend: {
+                    bottom: 0,
+                    itemWidth: 12,
+                    itemHeight: 12,
+                    icon: 'circle'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '10%',
+                    top: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: barData.map(d => d.name),
+                    axisLine: { show: false },
+                    axisTick: { show: false },
+                    axisLabel: { color: '#71717a' }
+                },
+                yAxis: {
+                    type: 'value',
+                    splitLine: { lineStyle: { type: 'dashed', color: '#f4f4f5' } },
+                    axisLine: { show: false },
+                    axisTick: { show: false },
+                    axisLabel: { show: false }
+                },
+                series: [
+                    {
+                        name: '预算额度',
+                        type: 'bar',
+                        data: barData.map(d => d.budget),
+                        itemStyle: { color: '#e4e4e7', borderRadius: [4, 4, 0, 0] },
+                        barMaxWidth: 30,
+                        barGap: '20%'
+                    },
+                    {
+                        name: '实际支出',
+                        type: 'bar',
+                        data: barData.map(d => d.actual),
+                        itemStyle: { color: '#18181b', borderRadius: [4, 4, 0, 0] },
+                        barMaxWidth: 30
+                    }
+                ]
+            };
+            barChartInstance.setOption(barOption);
+
+            // Init Pie Chart
+            const pieChartDom = document.getElementById('pie-chart');
+            pieChartInstance = echarts.init(pieChartDom);
+            const pieOption = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function(params) {
+                        return params.name + ': ' + formatCurrency(params.value) + ' (' + params.percent + '%)';
+                    },
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    extraCssText: 'box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px;'
+                },
+                legend: {
+                    orient: 'vertical',
+                    right: 10,
+                    top: 'center',
+                    icon: 'circle'
+                },
+                series: [
+                    {
+                        name: '支出构成',
+                        type: 'pie',
+                        radius: ['50%', '80%'],
+                        center: ['40%', '50%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 0,
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        label: { show: false },
+                        data: pieData,
+                        color: ['#18181b', '#3f3f46', '#52525b', '#71717a', '#a1a1aa', '#d4d4d8', '#e4e4e7', '#f4f4f5']
+                    }
+                ]
+            };
+            pieChartInstance.setOption(pieOption);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHeader();
+            renderMetrics();
+            renderList();
+            initCharts();
+            lucide.createIcons();
+            
+            window.addEventListener('resize', () => {
+                if(barChartInstance) barChartInstance.resize();
+                if(pieChartInstance) pieChartInstance.resize();
+            });
+        });
+    </script>
+</body>
+</html>

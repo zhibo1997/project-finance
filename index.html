@@ -1,72 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="fl-root-href" content='#[slot("root-route")]' />
-
-    <title>应用标题</title>
-
-    <!-- APM SDK -->
-    <script src="//cdn.fanneng.com/vendor/frontend-monitor-sdk/2.0.1/monitor.min.js"></script>
-
-    <!-- borwser updater -->
-    <link
-      href="//icomestatics.oss-cn-beijing.aliyuncs.com/frameless/static/resource/@enn/fl-browser-updater/0.1.5/dist/iife.css"
-      rel="stylesheet"
-    />
-    <script src="//icomestatics.oss-cn-beijing.aliyuncs.com/frameless/static/resource/@enn/fl-browser-updater/0.1.5/dist/iife.js"></script>
-
-    <!-- iconfont symbol resource  -->
-    <!-- 新智 -->
-    <script
-      async
-      src="//at.alicdn.com/t/c/font_3163814_8ymn9rrlnr2.js"
-    ></script>
-
-    <style>
-      :root {
-        --font-family-base: "Microsoft YaHei", -apple-system, BlinkMacSystemFont,
-          "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans",
-          "Droid Sans", "Helvetica Neue", sans-serif;
-        --font-family-mono: source-code-pro, Menlo, Monaco, Consolas,
-          "Courier New", monospace;
+    <title>My Trae Project</title>
+    <script type="module">
+      if (import.meta.hot?.on) {
+        import.meta.hot.on('vite:error', (error) => {
+          if (error.err) {
+            console.error(
+              [error.err.message, error.err.frame].filter(Boolean).join('\n'),
+            )
+          }
+        })
       }
-
-      body {
-        margin: 0;
-        width: 100%;
-        min-height: 100vh;
-        line-height: 1.4;
-        font-family: var(--font-family-base);
-        font-size: 16px;
-        font-weight: 400;
-        direction: ltr;
-        font-synthesis: none;
-        text-rendering: optimizeLegibility;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-    </style>
+    </script>
   </head>
-  <body data-fl-app class="sl-theme-light">
-    <link rel="stylesheet" href='#[slot("main-css")]' />
-
-    <fl-layout
-      appTitle='#[slot("app-title")]'
-      menuData='#[slot("menus")]'
-      rootPath='#[slot("root-route")]'
-      breadcrumbLabelMap='#[slot("breadcrumb-label-map")]'
-      breadcrumbRouteConfig='#[slot("breadcrumb-route-config")]'
-    >
-      <native-route-container disableShadow>
-        <native-route path='#[slot("root-route")]' disable-shadow virtualNode>
-          #[slot("routes")]
-        </native-route>
-      </native-route-container>
-    </fl-layout>
-
-    <!-- app content -->
-    <script type="module" src='#[slot("main")]'></script>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
