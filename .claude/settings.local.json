@@ -13,7 +13,12 @@
       "WebFetch(domain:localhost)",
       "Bash(curl:*)",
       "Bash(dir:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(git pull:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(npm install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
