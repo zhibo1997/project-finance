@@ -18,7 +18,7 @@ let pieChartInstance: echarts.ECharts | null = null;
 const initCharts = () => {
   if (barChartRef.value) {
     barChartInstance = echarts.init(barChartRef.value);
-    
+
     const barData = props.data.map(cat => ({
       name: cat.name,
       budget: cat.budget,
@@ -74,7 +74,7 @@ const initCharts = () => {
           name: '预算额度',
           type: 'bar',
           data: barData.map(d => d.budget),
-          itemStyle: { color: '#1677ff', borderRadius: [4, 4, 0, 0] },
+          itemStyle: { color: '#E6F4FF', borderRadius: [4, 4, 0, 0] },
           barMaxWidth: 30,
           barGap: '20%'
         },
@@ -82,7 +82,7 @@ const initCharts = () => {
           name: '实际支出',
           type: 'bar',
           data: barData.map(d => d.actual),
-          itemStyle: { color: '#52c41a', borderRadius: [4, 4, 0, 0] },
+          itemStyle: { color: '#165DFF', borderRadius: [4, 4, 0, 0] },
           barMaxWidth: 30
         }
       ]
@@ -91,11 +91,13 @@ const initCharts = () => {
 
   if (pieChartRef.value) {
     pieChartInstance = echarts.init(pieChartRef.value);
-    
+
     const pieData = props.data.map(cat => ({
       name: cat.name,
       value: calculateCategoryTotal(cat.expenses)
     })).filter(item => item.value > 0);
+
+    const colors = ['#165DFF', '#52C41A', '#FFC107', '#FF5252', '#722ED1', '#13C2C2', '#FA8C16', '#EB2F96'];
 
     pieChartInstance.setOption({
       tooltip: {
@@ -126,10 +128,7 @@ const initCharts = () => {
           },
           label: { show: false },
           data: pieData,
-          color: [
-            '#1677ff', '#4096ff', '#69b1ff', '#91caff', // Blue shades
-            '#52c41a', '#73d13d', '#95de64', '#b7eb8f'  // Green shades
-          ]
+          color: colors
         }
       ]
     });

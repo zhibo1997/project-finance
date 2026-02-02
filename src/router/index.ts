@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '@/pages/HomePage.vue'
+import ProjectApplication from '@/pages/ProjectApplication.vue'
+import ProjectListPage from '@/pages/ProjectListPage.vue'
 
 // 定义路由配置
 const routes = [
@@ -7,6 +9,16 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomePage,
+  },
+  {
+    path: '/application',
+    name: 'application',
+    component: ProjectApplication,
+  },
+  {
+    path: '/projects',
+    name: 'projects',
+    component: ProjectListPage,
   },
   {
     path: '/about',

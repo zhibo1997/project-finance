@@ -20,28 +20,28 @@ const styles = {
 </script>
 
 <template>
-  <div 
+  <div
     class="relative p-5 rounded-xl border shadow-[0_2px_10px_rgba(0,0,0,0.02)] transition-all hover:shadow-[0_8px_20px_rgba(0,0,0,0.04)] hover:-translate-y-0.5"
     :class="styles[type]"
   >
     <div class="flex justify-between items-start mb-4">
-      <div 
+      <div
         class="p-2 rounded-lg"
         :class="type === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-500'"
       >
         <component :is="icon" :size="18" />
       </div>
-      <span 
+      <span
         v-if="trend"
         class="text-xs font-medium px-2 py-0.5 rounded-full"
-        :class="Number(trend) > 0 ? 'ant-tag-success' : 'ant-tag-warning'"
+        :class="Number(trend) > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-50 text-amber-700'"
       >
         {{ Number(trend) > 0 ? '+' : '' }}{{ trend }}%
       </span>
     </div>
-    
+
     <div>
-      <p 
+      <p
         class="text-xs font-medium uppercase tracking-wider mb-1"
         :class="type === 'dark' ? 'text-gray-400' : 'text-gray-500'"
       >
@@ -50,7 +50,7 @@ const styles = {
       <h3 class="text-2xl font-bold tracking-tight tabular-nums">
         {{ value }}
       </h3>
-      <p 
+      <p
         v-if="subValue"
         class="text-xs mt-2 leading-relaxed"
         :class="type === 'dark' ? 'text-gray-500' : 'text-gray-400'"

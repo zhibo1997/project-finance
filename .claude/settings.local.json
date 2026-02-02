@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(npm run dev)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(npm run build)",
+      "Bash(pkill:*)",
+      "Bash(taskkill:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(tree:*)",
+      "Bash(timeout:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(curl:*)",
+      "Bash(dir:*)"
     ]
   }
 }
