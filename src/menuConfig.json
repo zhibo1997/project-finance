@@ -1,0 +1,37 @@
+{
+  "demo": {
+    "name": "demo",
+    "icon": "",
+    "isHidden": true
+  },
+  "demo/hello-world": {
+    "name": "hello world",
+    "icon": "",
+    "route": "demo/hello-world",
+    "isHidden": true
+  },
+  "demo/nest-route-demo": {
+    "name": "嵌套路由 demo",
+    "icon": "",
+    "route": "demo/nest-route-demo",
+    "isHidden": true
+  },
+  "demo/nest-route-demo/list": {
+    "name": "list",
+    "icon": "",
+    "route": "demo/nest-route-demo/list",
+    "isHidden": true
+  },
+  "VIRTUAL_ROOT": {
+    "name": "iframe",
+    "icon": "",
+    "route": "",
+    "isHidden": false
+  },
+  "VIRTUAL_ROOT/list": {
+    "name": "嵌套在iframe内部的list",
+    "icon": "",
+    "route": "VIRTUAL_ROOT/list",
+    "isHidden": false
+  }
+}

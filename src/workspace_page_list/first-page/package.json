@@ -1,0 +1,30 @@
+{
+  "name": "first-page",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@enn/ency-design": "^1.7.31",
+    "@enn/fl-vue-router-patcher": "^1.0.2",
+    "vue": "^3.2.47",
+    "vue-router": "^4.1.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "typescript": "^4.9.5",
+    "vite": "^4.1.4",
+    "vue-tsc": "^0.38.9"
+  },
+  "fl-config": {
+    "route": "first-page",
+    "pageKey": "first-page",
+    "pageName": "第一个页面",
+    "disable-shadow-dom": true,
+    "isSelfType": false
+  }
+}
