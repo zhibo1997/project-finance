@@ -12,7 +12,8 @@
       "Bash(timeout:*)",
       "WebFetch(domain:localhost)",
       "Bash(curl:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(npm view:*)"
     ]
   }
 }
