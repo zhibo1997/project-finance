@@ -1,161 +1,146 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { FolderOpen, CheckCircle, Clock } from 'lucide-vue-next'
-import { PROJECT_LIST_DATA, type Project, type ProjectStatus, formatCurrency } from '../data/projectListData'
+import { ref, computed } from 'vue';
+import {
+  TrendingUp,
+  Briefcase,
+  List,
+  LayoutGrid,
+  AlertCircle,
+  Target,
+  PieChart,
+  BarChart3
+} from 'lucide-vue-next';
 
-const router = useRouter()
-const projects = ref<Project[]>(PROJECT_LIST_DATA)
-const statusFilter = ref<ProjectStatus | 'all'>('all')
+import { PROJECT_DATA, calculateCategoryTotal, formatCurrency } from '../data/projectData';
+import Header from '../components/Header.vue';
+import MetricCard from '../components/MetricCard.vue';
+import ChartsView from '../components/ChartsView.vue';
+import ListView from '../components/ListView.vue';
 
-const filteredProjects = computed(() => {
-  if (statusFilter.value === 'all') {
-    return projects.value
-  }
-  return projects.value.filter(project => project.status === statusFilter.value)
-})
+const { basicInfo, summary, categories } = PROJECT_DATA;
+const viewMode = ref<'list' | 'chart'>('list');
 
-const navigateToProjects = () => {
-  router.push('/projects')
-}
+// 核心财务数据
+const estimatedIncome = summary.income.amount; // 预计收入
+const recordedIncome = summary.recordedIncome; // 入账收入
+const estimatedExpense = summary.budget.amount; // 预计支出
+const actualExpense = computed(() => categories.reduce((sum, cat) => sum + calculateCategoryTotal(cat.expenses), 0)); // 实际支出
+
+// 专业财务指标计算
+const incomeDeviation = computed(() => recordedIncome - estimatedIncome); // 收入偏差
+const incomeDeviationRate = computed(() => estimatedIncome > 0 ? ((incomeDeviation.value / estimatedIncome) * 100).toFixed(1) : '0.0'); // 收入偏差率
+const expenseDeviation = computed(() => actualExpense.value - estimatedExpense); // 支出偏差
+const expenseDeviationRate = computed(() => estimatedExpense > 0 ? ((expenseDeviation.value / estimatedExpense) * 100).toFixed(1) : '0.0'); // 支出偏差率
+const estimatedGrossProfit = estimatedIncome - estimatedExpense; // 预计毛利额
+const estimatedGrossProfitMargin = estimatedIncome > 0 ? ((estimatedGrossProfit / estimatedIncome) * 100).toFixed(1) : '0.0'; // 预计毛利率
+const actualGrossProfit = computed(() => recordedIncome - actualExpense.value); // 实际毛利额
+const actualGrossProfitMargin = computed(() => recordedIncome > 0 ? ((actualGrossProfit.value / recordedIncome) * 100).toFixed(1) : '0.0'); // 实际毛利率
+const profitDeviation = computed(() => actualGrossProfit.value - estimatedGrossProfit); // 毛利偏差
+const profitDeviationRate = computed(() => estimatedGrossProfit > 0 ? ((profitDeviation.value / estimatedGrossProfit) * 100).toFixed(1) : '0.0'); // 毛利偏差率
+
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] font-sans pb-12">
+  <div class="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] font-sans selection:bg-gray-200 selection:text-gray-900 pb-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
-      <!-- 页面标题和操作按钮 -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900 tracking-tight">项目看板</h1>
-          <p class="mt-2 text-sm text-gray-600">
-            项目概览与状态管理
+
+      <!-- 1. Header Section -->
+      <Header :info="basicInfo" />
+
+      <!-- 2. 核心财务指标 -->
+      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+          <Target :size="18" class="text-blue-600"/>
+          核心财务指标
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- 预计收入 -->
+          <MetricCard
+            label="预计收入"
+            :value="formatCurrency(estimatedIncome)"
+            :icon="Target"
+            subValue="合同金额"
+            type="neutral"
+          />
+          <!-- 入账收入 -->
+          <MetricCard
+            label="入账收入"
+            :value="formatCurrency(recordedIncome)"
+            :icon="TrendingUp"
+            :subValue="`偏差: ${formatCurrency(incomeDeviation)} (${incomeDeviationRate}%)`"
+            :trend="incomeDeviationRate"
+            type="neutral"
+          />
+          <!-- 预计毛利率 -->
+          <MetricCard
+            label="预计毛利率"
+            :value="`${estimatedGrossProfitMargin}%`"
+            :icon="PieChart"
+            :subValue="`预计毛利: ${formatCurrency(estimatedGrossProfit)}`"
+            type="neutral"
+          />
+          <!-- 实际毛利率 -->
+          <MetricCard
+            label="实际毛利率"
+            :value="`${actualGrossProfitMargin}%`"
+            :icon="BarChart3"
+            :subValue="`实际毛利: ${formatCurrency(actualGrossProfit)} | 偏差: ${formatCurrency(profitDeviation)} (${profitDeviationRate}%)`"
+            :trend="profitDeviationRate"
+            type="neutral"
+          />
+        </div>
+      </div>
+
+      <!-- 3. Details / Charts Section -->
+      <div class="space-y-4">
+        <!-- Section Header & Toggle -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h2 class="text-lg font-semibold text-gray-900 tracking-tight flex items-center gap-2">
+            <Briefcase :size="18" class="text-gray-500"/>
+            资金分析与明细
+          </h2>
+          
+          <!-- Toggle Control -->
+          <div class="bg-gray-200/50 p-1 rounded-lg flex items-center self-start sm:self-auto">
+            <button 
+              @click="viewMode = 'list'"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200"
+              :class="viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+            >
+              <List :size="14" />
+              明细列表
+            </button>
+            <button 
+              @click="viewMode = 'chart'"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200"
+              :class="viewMode === 'chart' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+            >
+              <LayoutGrid :size="14" />
+              可视化报表
+            </button>
+          </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="min-h-[400px]">
+           <ListView v-if="viewMode === 'list'" :data="categories" />
+           <ChartsView
+             v-else
+             :data="categories"
+             :totalBudget="estimatedExpense"
+             :totalActual="actualExpense"
+           />
+        </div>
+        
+        <!-- Note Footer -->
+        <div class="flex items-start gap-2 text-xs text-gray-400 px-2 mt-4 max-w-3xl">
+          <AlertCircle :size="14" class="mt-0.5 shrink-0" />
+          <p>
+            数据说明：项目收入为独立具体项目收入。业务成本预算包含除人工成本外的所有费用支出。如因项目调整导致预算变更，需重新补充立项审批单。
           </p>
         </div>
-        <button
-          @click="navigateToProjects"
-          class="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors shadow-sm"
-        >
-          <FolderOpen :size="18" />
-          项目列表
-        </button>
       </div>
 
-      <!-- 项目状态看板 -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- 已完成项目 -->
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div class="bg-green-50 px-4 py-3 border-b border-green-200 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-              <h3 class="font-semibold text-green-800">已完成项目</h3>
-            </div>
-            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">{{
-              projects.filter(p => p.status === '已完成').length
-            }}</span>
-          </div>
-          <div class="p-4 space-y-3 max-h-[500px] overflow-y-auto">
-            <div
-              v-for="project in projects.filter(p => p.status === '已完成')"
-              :key="project.id"
-              class="p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors"
-            >
-              <div class="flex items-center justify-between mb-2">
-                <h4 class="font-medium text-gray-900 text-sm">{{ project.projectName }}</h4>
-                <span class="text-xs text-green-600 flex items-center gap-1">
-                  <CheckCircle :size="12" />
-                  已完成
-                </span>
-              </div>
-              <div class="flex items-center justify-between text-xs text-gray-500">
-                <span>{{ project.clientName }}</span>
-                <span>{{ formatCurrency(project.serviceAmount) }}</span>
-              </div>
-            </div>
-            <div v-if="projects.filter(p => p.status === '已完成').length === 0" class="text-center py-8 text-gray-400 text-sm">
-              暂无已完成项目
-            </div>
-          </div>
-        </div>
-
-        <!-- 立项中(草稿箱)项目 -->
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div class="bg-yellow-50 px-4 py-3 border-b border-yellow-200 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-              <h3 class="font-semibold text-yellow-800">立项中(草稿箱)</h3>
-            </div>
-            <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">{{
-              projects.filter(p => p.status === '立项中').length
-            }}</span>
-          </div>
-          <div class="p-4 space-y-3 max-h-[500px] overflow-y-auto">
-            <div
-              v-for="project in projects.filter(p => p.status === '立项中')"
-              :key="project.id"
-              class="p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors"
-            >
-              <div class="flex items-center justify-between mb-2">
-                <h4 class="font-medium text-gray-900 text-sm">{{ project.projectName }}</h4>
-                <span class="text-xs text-yellow-600 flex items-center gap-1">
-                  <Clock :size="12" />
-                  立项中
-                </span>
-              </div>
-              <div class="flex items-center justify-between text-xs text-gray-500">
-                <span>{{ project.clientName }}</span>
-                <span>{{ formatCurrency(project.serviceAmount) }}</span>
-              </div>
-            </div>
-            <div v-if="projects.filter(p => p.status === '立项中').length === 0" class="text-center py-8 text-gray-400 text-sm">
-              暂无立项中项目
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 项目统计信息 -->
-      <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">项目统计</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="text-center">
-            <div class="text-2xl font-bold text-gray-900">{{ projects.length }}</div>
-            <div class="text-xs text-gray-500 mt-1">总项目数</div>
-          </div>
-          <div class="text-center">
-            <div class="text-2xl font-bold text-green-600">{{ projects.filter(p => p.status === '已完成').length }}</div>
-            <div class="text-xs text-gray-500 mt-1">已完成</div>
-          </div>
-          <div class="text-center">
-            <div class="text-2xl font-bold text-yellow-600">{{ projects.filter(p => p.status === '立项中').length }}</div>
-            <div class="text-xs text-gray-500 mt-1">立项中</div>
-          </div>
-          <div class="text-center">
-            <div class="text-2xl font-bold text-blue-600">{{ formatCurrency(projects.reduce((sum, p) => sum + p.serviceAmount, 0)).replace('¥', '') }}</div>
-            <div class="text-xs text-gray-500 mt-1">总金额</div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-/* 自定义滚动条 */
-.overflow-y-auto::-webkit-scrollbar {
-  width: 4px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 2px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 2px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-</style>

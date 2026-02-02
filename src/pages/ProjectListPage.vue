@@ -1,18 +1,56 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, CheckCircle, Clock, LayoutGrid, Edit3 } from 'lucide-vue-next'
+import { Plus, CheckCircle, Clock, LayoutGrid, Edit3, User, Shield, Users, Building2 } from 'lucide-vue-next'
 import { PROJECT_LIST_DATA, type Project, type ProjectStatus, formatCurrency } from '../data/projectListData'
+import { useAuth } from '../composables/useAuth'
+import type { UserRole } from '../types/user'
 
 const router = useRouter()
 const projects = ref<Project[]>(PROJECT_LIST_DATA)
 const statusFilter = ref<ProjectStatus | 'all'>('all')
 
+// 权限管理
+const {
+  currentUser,
+  currentRoleConfig,
+  switchRole,
+  initAuth,
+  canViewAllProjects,
+  canCreateProjects,
+  canBookkeepingIncome,
+  canBookkeepingExpense,
+  canEditProjects
+} = useAuth()
+
+onMounted(() => {
+  initAuth()
+})
+
+// 根据角色过滤项目
 const filteredProjects = computed(() => {
-  if (statusFilter.value === 'all') {
-    return projects.value
+  let filtered = projects.value
+
+  // 根据角色过滤项目
+  if (!canViewAllProjects.value) {
+    // 项目经理只能看到自己负责的项目
+    if (currentUser.value.role === 'project_manager') {
+      filtered = filtered.filter(project => project.projectLeader === currentUser.value.name)
+    }
+    // 项目成员只能看到自己参与的项目（这里简化为看到所有项目，实际需要根据成员列表过滤）
+    // 为了演示，项目成员也只能看到特定项目
+    if (currentUser.value.role === 'project_member') {
+      // 假设项目成员只能看到赵六和王五负责的项目
+      filtered = filtered.filter(project => ['赵六', '王五'].includes(project.projectLeader))
+    }
   }
-  return projects.value.filter(project => project.status === statusFilter.value)
+
+  // 根据状态过滤
+  if (statusFilter.value !== 'all') {
+    filtered = filtered.filter(project => project.status === statusFilter.value)
+  }
+
+  return filtered
 })
 
 const handleAddProject = () => {
@@ -29,12 +67,49 @@ const handleEditProject = (projectId: string) => {
 }
 
 const navigateToDashboard = () => {
-  router.push('/')
+  router.push('/accountingList')
 }
 </script>
 
 <template>
   <div class="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] font-sans pb-12 flex flex-col">
+    <!-- 模拟登录状态和角色切换 -->
+    <div class="bg-white border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <User class="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">{{ currentUser.name }}</p>
+                <p class="text-xs text-gray-500">{{ currentUser.email }}</p>
+              </div>
+            </div>
+            <div class="h-6 w-px bg-gray-300"></div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-600">角色:</span>
+              <div class="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  v-for="(config, role) in { admin: '管理员', project_manager: '项目经理', project_member: '项目成员' }"
+                  :key="role"
+                  @click="switchRole(role as UserRole)"
+                  class="px-3 py-1 text-sm rounded-md transition-colors flex items-center gap-1"
+                  :class="currentUser.role === role
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-600 hover:bg-gray-200'"
+                >
+                  {{ config }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="text-xs text-gray-500">{{ currentRoleConfig.description }}</div>
+        </div>
+      </div>
+    </div>
+
     <div class="flex-1 flex flex-col">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col">
         <!-- 页面标题和操作按钮 -->
@@ -42,11 +117,12 @@ const navigateToDashboard = () => {
           <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">项目列表</h1>
             <p class="mt-2 text-sm text-gray-600">
-              管理和查看所有项目信息，支持项目记账和状态筛选
+              {{ currentRoleConfig.description }}
             </p>
           </div>
           <div class="flex gap-3">
             <button
+              v-if="canCreateProjects"
               @click="handleAddProject"
               class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm"
             >
@@ -173,10 +249,10 @@ const navigateToDashboard = () => {
                           class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
                         >
                           <span class="text-base">￥</span>
-                          记账
+                          {{ canBookkeepingIncome && canBookkeepingExpense ? '记账' : '支出记账' }}
                         </button>
                         <button
-                          v-if="project.status === '立项中'"
+                          v-if="canEditProjects && project.status === '立项中'"
                           @click="handleEditProject(project.id)"
                           class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-orange-600 bg-orange-50 rounded-md hover:bg-orange-100 transition-colors"
                         >

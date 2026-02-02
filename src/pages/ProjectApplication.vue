@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Plus, Trash2, Save, Calendar, Calculator, X, ArrowLeft } from 'lucide-vue-next'
 import SearchableEmployeeSelect from '@/components/SearchableEmployeeSelect.vue'
+import MultiSelectEmployee from '@/components/MultiSelectEmployee.vue'
 
 const router = useRouter()
 
@@ -46,6 +47,7 @@ interface ProjectBasicInfo {
   startDate: string
   endDate: string
   background: string
+  projectMembers: string[] // 项目成员（多选）
 }
 
 interface ServiceItem {
@@ -91,7 +93,8 @@ const basicInfo = ref<ProjectBasicInfo>({
   contactPerson: '各组织人发',
   startDate: '2025-04-01',
   endDate: '2025-12-31',
-  background: '通过组织新入司伙伴文化融入项目，帮助新入司伙伴快速理解认知新奥文化。'
+  background: '通过组织新入司伙伴文化融入项目，帮助新入司伙伴快速理解认知新奥文化。',
+  projectMembers: [] // 初始化项目成员为空数组
 })
 
 // 2. 收入与税率
@@ -133,6 +136,7 @@ const totalCost = computed(() => totalOutsourcingCost.value + totalLaborCost.val
 const grossProfit = computed(() => netRevenue.value - totalCost.value)
 // 利润率计算：毛利 / 净收入 (如果净收入为0，则为0)
 const profitMargin = computed(() => netRevenue.value !== 0 ? (grossProfit.value / netRevenue.value) * 100 : 0)
+
 
 // --- 事件处理函数 ---
 // 服务项
@@ -209,8 +213,21 @@ const updateOtherItem = (index: number, field: keyof OtherExpenseItem, value: st
   }
 }
 
+// 保存和提交逻辑
+const handleSaveDraft = () => {
+  console.log('保存草稿', basicInfo.value)
+  // 这里可以添加保存到本地存储或API的逻辑
+  alert('草稿已保存')
+}
+
+const handleSubmit = () => {
+  console.log('提交审批', basicInfo.value)
+  // 这里可以添加提交到API的逻辑
+  alert('已提交审批')
+}
+
 // 样式类
-const sectionClass = "bg-white mb-4 border-t border-b md:border md:rounded-lg border-gray-200 overflow-hidden"
+const sectionClass = "bg-white mb-4 border-t border-b md:border md:rounded-lg border-gray-200"
 const headerClass = "bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center font-bold text-gray-800 text-sm md:text-base"
 const labelClass = "block text-xs font-semibold text-gray-500 mb-1"
 const inputClass = "w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
@@ -320,7 +337,17 @@ const addBtnClass = "flex items-center justify-center gap-1 text-sm text-blue-60
             </div>
           </div>
 
-          <!-- 第四行：背景 -->
+          <!-- 第四行：项目成员 -->
+          <div class="md:col-span-2 p-4 rounded-lg border border-gray-100 bg-gray-50">
+            <label :class="labelClass">项目成员</label>
+            <MultiSelectEmployee
+              v-model="basicInfo.projectMembers"
+            />
+            <div class="mt-1 text-xs text-gray-500">可多选项目成员</div>
+          </div>
+
+
+          <!-- 第六行：背景 -->
           <div class="md:col-span-2 p-4 rounded-lg border border-gray-100 bg-white">
             <label :class="labelClass">项目背景</label>
             <textarea
@@ -628,10 +655,16 @@ const addBtnClass = "flex items-center justify-center gap-1 text-sm text-blue-60
 
         <!-- 操作按钮 -->
         <div class="flex gap-3 w-full md:w-auto">
-          <button class="flex-1 md:flex-none px-6 py-2.5 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition active:scale-95">
+          <button
+            @click="handleSaveDraft"
+            class="flex-1 md:flex-none px-6 py-2.5 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition active:scale-95"
+          >
             保存草稿
           </button>
-          <button class="flex-1 md:flex-none px-6 py-2.5 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 shadow-sm transition active:scale-95 flex items-center justify-center gap-2">
+          <button
+            @click="handleSubmit"
+            class="flex-1 md:flex-none px-6 py-2.5 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 shadow-sm transition active:scale-95 flex items-center justify-center gap-2"
+          >
             <Save class="w-4 h-4" /> 提交审批
           </button>
         </div>

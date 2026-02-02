@@ -7,7 +7,12 @@ import ProjectListPage from '@/pages/ProjectListPage.vue'
 const routes = [
   {
     path: '/',
-    name: 'home',
+    name: 'projects',
+    component: ProjectListPage,
+  },
+  {
+    path: '/accountingList',
+    name: 'accountingList',
     component: HomePage,
   },
   {
@@ -15,11 +20,11 @@ const routes = [
     name: 'application',
     component: ProjectApplication,
   },
-  {
-    path: '/projects',
-    name: 'projects',
-    component: ProjectListPage,
-  },
+  // {
+  //   path: '/projects',
+  //   name: 'projects',
+  //   component: ProjectListPage,
+  // },
   {
     path: '/about',
     name: 'about',
