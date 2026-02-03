@@ -1,0 +1,8 @@
+const _id__vue_vue_type_style_index_0_scoped_8dd3447a_lang = ".project-detail[data-v-8dd3447a]{margin:0 auto;max-width:1200px}.page-header[data-v-8dd3447a]{align-items:center;display:flex;justify-content:space-between;margin-bottom:20px}.header-actions[data-v-8dd3447a]{display:flex;gap:8px}.project-content[data-v-8dd3447a]{background-color:#fff;border-radius:8px;box-shadow:0 2px 8px #0000001a;padding:20px}.project-info h3[data-v-8dd3447a]{color:#1890ff;font-size:24px;margin:0 0 16px}.project-info p[data-v-8dd3447a]{color:#666;font-size:14px;margin:8px 0}.project-form-data[data-v-8dd3447a]{margin-top:24px}.form-section[data-v-8dd3447a]{border:1px solid #e8e8e8;border-radius:4px;margin-bottom:24px;padding:16px}.form-section h4[data-v-8dd3447a]{color:#333;font-size:16px;margin:0 0 12px}.project-records[data-v-8dd3447a]{margin-top:24px}.record-filters[data-v-8dd3447a]{align-items:center;display:flex;justify-content:space-between;margin-bottom:16px}.record-type-select[data-v-8dd3447a]{border:1px solid #d9d9d9;border-radius:4px;font-size:14px;padding:8px 12px}.status-draft[data-v-8dd3447a]{color:#faad14}.status-submitted[data-v-8dd3447a]{color:#1890ff}.status-completed[data-v-8dd3447a]{color:#52c41a}.status-closed[data-v-8dd3447a]{color:#8c8c8c}@media(max-width:768px){.page-header[data-v-8dd3447a]{align-items:flex-start;flex-direction:column;gap:16px}.header-actions[data-v-8dd3447a]{flex-direction:column;width:100%}.project-info h3[data-v-8dd3447a]{font-size:20px}.table[data-v-8dd3447a]{font-size:12px}.table td[data-v-8dd3447a],.table th[data-v-8dd3447a]{padding:8px}}";
+
+const _id_Styles_DrHr8nh5 = [
+  _id__vue_vue_type_style_index_0_scoped_8dd3447a_lang
+];
+
+export { _id_Styles_DrHr8nh5 as default };
+//# sourceMappingURL=_id_-styles.DrHr8nh5.mjs.map

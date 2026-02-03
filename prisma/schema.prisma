@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 项目表
+model Project {
+  id              String        @id @default(cuid())
+  projectName     String        @map("project_name")
+  projectLeader   String        @map("project_leader")
+  clientName      String        @map("client_name")
+  projectType     String        @map("project_type")
+  serviceStartDate DateTime     @map("service_start_date")
+  serviceEndDate  DateTime     @map("service_end_date")
+  serviceAmount   Decimal       @map("service_amount")
+  status          String        @default("draft")
+  formData        String        @map("form_data")
+  createdBy       String        @map("created_by")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  members         ProjectMember[]
+  records         AccountingRecord[]
+
+  @@map("projects")
+}
+
+// 项目成员表
+model ProjectMember {
+  id          String    @id @default(cuid())
+  projectId   String    @map("project_id")
+  userId      String    @map("user_id")
+  userName    String    @map("user_name")
+  role        String    @default("member")
+
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@map("project_members")
+  @@unique([projectId, userId])
+}
+
+// 记账表
+model AccountingRecord {
+  id              String    @id @default(cuid())
+  projectId       String    @map("project_id")
+  recordType      String    @map("record_type")
+  approvalId      String    @map("approval_id")
+  recordDate      DateTime  @map("record_date")
+  amount          Decimal
+  categoryId      String?   @map("category_id")
+  description     String?
+  applicant       String?
+  invoiceNo       String?   @map("invoice_no")
+  payer           String?
+  attachments     String?
+  remark          String?
+  createdBy       String    @map("created_by")
+  createdByName   String?   @map("created_by_name")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("accounting_records")
+}
+
+// 费用类别字典
+model ExpenseCategory {
+  id          String    @id @default(cuid())
+  name        String
+  sortOrder   Int       @default(0) @map("sort_order")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("expense_categories")
+}
+
+// 采购内容字典
+model PurchaseContent {
+  id          String    @id @default(cuid())
+  name        String
+  sortOrder   Int       @default(0) @map("sort_order")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("purchase_contents")
+}
+
+// 员工成本配置
+model EmployeeCostConfig {
+  id          String    @id @default(cuid())
+  levelKey    String    @map("level_key")
+  levelName   String    @map("level_name")
+  dailyCost   Decimal   @map("daily_cost")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("employee_cost_config")
+  @@unique([levelKey])
+}

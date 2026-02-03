@@ -2,7 +2,13 @@
 
 export default {
   darkMode: "class",
-  content: ["./index.html", "./src/**/*.{js,ts,vue}"],
+  content: [
+    "./components/**/*.{js,vue,ts}",
+    "./layouts/**/*.vue",
+    "./pages/**/*.vue",
+    "./plugins/**/*.{js,ts}",
+    "./app.vue",
+  ],
   theme: {
     container: {
       center: true,
@@ -29,13 +35,13 @@ export default {
       },
       fontFamily: {
         sans: [
-          '-apple-system', 
-          'BlinkMacSystemFont', 
-          'Segoe UI', 
-          'Roboto', 
-          'Helvetica Neue', 
-          'Arial', 
-          'Noto Sans', 
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'Noto Sans',
           'sans-serif'
         ],
       }
