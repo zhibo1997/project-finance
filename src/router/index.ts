@@ -20,11 +20,6 @@ const routes = [
     name: 'application',
     component: ProjectApplication,
   },
-  // {
-  //   path: '/projects',
-  //   name: 'projects',
-  //   component: ProjectListPage,
-  // },
   {
     path: '/about',
     name: 'about',

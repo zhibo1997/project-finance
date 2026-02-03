@@ -12,7 +12,10 @@
       "Bash(timeout:*)",
       "WebFetch(domain:localhost)",
       "Bash(curl:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(npm search:*)",
+      "Bash(pnpm add:*)",
+      "Bash(claude mcp add mcp_server_mysql:*)"
     ]
   }
 }

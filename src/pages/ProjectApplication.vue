@@ -8,7 +8,7 @@ import MultiSelectEmployee from '@/components/MultiSelectEmployee.vue'
 const router = useRouter()
 
 const handleBack = () => {
-  router.push('/projects')
+  router.push('/')
 }
 
 // --- 模拟海量员工数据库 (100+ 条数据模拟) ---
@@ -49,7 +49,6 @@ interface ProjectBasicInfo {
   background: string
   projectMembers: string[] // 项目成员（多选）
 }
-
 interface ServiceItem {
   id: string
   content: string
