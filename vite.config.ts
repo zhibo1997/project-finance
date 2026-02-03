@@ -15,11 +15,18 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'), // ✅ 定义 @ = src
+      '@': path.resolve(__dirname, './src'), // 定义 @ = src
     },
   },
   server: {
     port: 3001,
     host: '0.0.0.0', // 监听所有接口，允许外部访问
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   },
 })
