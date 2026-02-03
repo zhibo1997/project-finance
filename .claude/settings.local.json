@@ -1,21 +1,29 @@
 {
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
-      "Bash(npm run dev)",
-      "Bash(findstr:*)",
-      "Bash(npm run build)",
-      "Bash(pkill:*)",
-      "Bash(taskkill:*)",
-      "Bash(python:*)",
-      "Bash(pip install:*)",
-      "Bash(tree:*)",
-      "Bash(timeout:*)",
-      "WebFetch(domain:localhost)",
-      "Bash(curl:*)",
-      "Bash(dir:*)",
-      "Bash(npm search:*)",
-      "Bash(pnpm add:*)",
-      "Bash(claude mcp add mcp_server_mysql:*)"
+      "Bash(*)",
+      
+      "Edit",
+      "ReadFile",
+      "WriteFile",
+      "ListFiles",
+      "DeleteFile",
+      
+      "WebFetch(*)",
+      "mcp__filesystem",
+      "mcp__github",
+      "mcp__sequential-thinking",
+      "mcp__playwright",  
+      "mcp__context7",
+      "mcp__web-search-prime"  
     ]
+  },
+  
+  "hasCompletedOnboarding": true,
+  "hasTrustDialogAccepted": true,
+  
+  "plugins": {
+    "enabled": ["feature-dev", "commit-commands", "ralph-loop", "code-review"]
   }
 }
