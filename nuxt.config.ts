@@ -1,7 +1,7 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: [],
-  css: ['~/assets/css/main.css'],
+  css: ['~/app/assets/css/main.css'],
   app: {
     head: {
       title: '项目维度财务数据系统',
@@ -10,6 +10,22 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: '项目维度财务数据系统' }
       ]
+    }
+  },
+  vite: {
+    build: {
+      sourcemap: 'hidden'
+    },
+    plugins: [],
+    server: {
+      port: 3001,
+      host: '0.0.0.0'
+    }
+  },
+  postcss: {
+    plugins: {
+      '@tailwindcss/postcss': {},
+      autoprefixer: {}
     }
   }
 })
