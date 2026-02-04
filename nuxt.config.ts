@@ -1,7 +1,3 @@
-import AutoImport from "unplugin-auto-import/vite";
-import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
-import Components from "unplugin-vue-components/vite";
-
 export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: [],
@@ -16,35 +12,12 @@ export default defineNuxtConfig({
       ]
     }
   },
-  vite: {
-    build: {
-      sourcemap: 'hidden'
-    },
-    server: {
-      port: 3001,
-      host: '0.0.0.0'
-    },    
-    plugins: [
-      AutoImport({
-        imports: [
-          {
-            'naive-ui': [
-              'useDialog',
-              'useMessage',
-              'useNotification',
-              'useLoadingBar'
-            ]
-          }
-        ]
-      }),
-      Components({
-        resolvers: [NaiveUiResolver()]
-      })
-    ]
+  devServer: {
+    port: 3001,
+    host: '0.0.0.0'
   },
   postcss: {
     plugins: {
-      '@tailwindcss/postcss': {},
       autoprefixer: {}
     }
   }

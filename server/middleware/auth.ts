@@ -69,5 +69,4 @@ export default defineEventHandler((event) => {
   authenticate(event)
 
   // 可以在此处添加更多权限检查逻辑
-  return event
 })

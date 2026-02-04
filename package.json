@@ -10,12 +10,15 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@prisma/client": "^4.16.2",
     "@vicons/ionicons5": "^0.13.0",
     "@vueuse/core": "^12.0.0",
     "dayjs": "^1.11.13",
     "echarts": "^6.0.0",
+    "exceljs": "^4.4.0",
     "naive-ui": "^2.40.1",
     "nuxt": "^3.20.2",
+    "prisma": "^4.16.2",
     "vue": "latest",
     "vue-echarts": "^8.0.1"
   },

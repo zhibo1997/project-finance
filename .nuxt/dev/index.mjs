@@ -5,8 +5,8 @@ import nodeCrypto, { randomUUID } from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
 import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readMultipartFormData, sendStream, getResponseStatusText } from 'file://D:/%E9%A1%B9%E7%9B%AEdemo/baobiao/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://D:/%E9%A1%B9%E7%9B%AEdemo/baobiao/node_modules/@vue/shared/dist/shared.cjs.js';
-import ExcelJS from 'exceljs';
-import { PrismaClient } from '@prisma/client';
+import ExcelJS from 'file://D:/%E9%A1%B9%E7%9B%AEdemo/baobiao/node_modules/exceljs/excel.js';
+import { PrismaClient } from 'file://D:/%E9%A1%B9%E7%9B%AEdemo/baobiao/node_modules/@prisma/client/index.js';
 import { readFile, writeFile, unlink, mkdir } from 'node:fs/promises';
 import { promises, existsSync, createReadStream } from 'node:fs';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://D:/%E9%A1%B9%E7%9B%AEdemo/baobiao/node_modules/vue-bundle-renderer/dist/runtime.mjs';
@@ -2257,7 +2257,6 @@ function authenticate(event) {
 }
 const _B5J9rK = defineEventHandler((event) => {
   authenticate(event);
-  return event;
 });
 
 const VueResolver = (_, value) => {
