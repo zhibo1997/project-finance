@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 项目表
+model projects {
+  id                  String    @id @default(uuid())
+  project_name        String    @db.VarChar(200)
+  project_leader      String    @db.VarChar(100)
+  client_name         String?   @db.VarChar(200)
+  project_type        String?   @db.VarChar(100)
+  service_start_date  DateTime?
+  service_end_date    DateTime?
+  service_amount      Decimal?  @db.Decimal(15, 2)
+  status              String    @default("draft")
+  form_data           Json?
+  created_by          String?   @db.VarChar(36)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  project_members     project_members[]
+  accounting_records  accounting_records[]
+
+  @@index([status])
+  @@index([project_leader])
+  @@index([created_at], map: "idx_created")
+}
+
+// 项目成员表
+model project_members {
+  id          String    @id @default(uuid())
+  project_id  String    @db.VarChar(36)
+  user_id     String    @db.VarChar(36)
+  user_name   String?   @db.VarChar(100)
+  role        String    @default("member")
+  created_at  DateTime  @default(now())
+
+  project     projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@unique([project_id, user_id], map: "uk_project_user")
+}
+
+// 记账表
+model accounting_records {
+  id                  String    @id @default(uuid())
+  project_id          String    @db.VarChar(36)
+  record_type         String
+  approval_id         String    @db.VarChar(100)
+  record_date         DateTime
+  amount              Decimal   @db.Decimal(15, 2)
+  category_id         String?   @db.VarChar(36)
+  description         String?
+  applicant           String?   @db.VarChar(100)
+  invoice_no          String?   @db.VarChar(100)
+  payer               String?   @db.VarChar(200)
+  attachments         Json?
+  remark              String?
+  created_by          String    @db.VarChar(36)
+  created_by_name     String?   @db.VarChar(100)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  project             projects  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@index([project_id])
+  @@index([record_type])
+  @@index([record_date])
+}
+
+// 费用类别字典
+model expense_categories {
+  id          String    @id @default(uuid())
+  name        String    @db.VarChar(100)
+  sort_order  Int       @default(0)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+}
+
+// 采购内容字典
+model purchase_contents {
+  id          String    @id @default(uuid())
+  name        String    @db.VarChar(200)
+  sort_order  Int       @default(0)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+}
+
+// 员工成本配置表
+model employee_cost_config {
+  id          String    @id @default(uuid())
+  level_key   String    @db.VarChar(50)
+  level_name  String    @db.VarChar(100)
+  daily_cost  Decimal   @db.Decimal(10, 2)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  @@unique([level_key], map: "uk_level")
+}
