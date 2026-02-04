@@ -3,65 +3,76 @@
     <div class="projects-page">
       <div class="page-header">
         <h2>项目管理</h2>
-        <NuxtLink to="/projects/new" class="btn btn-primary">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
+        <n-button type="primary" size="large" @click="navigateTo('/projects/new')">
+          <template #icon>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </template>
           新建项目
-        </NuxtLink>
+        </n-button>
       </div>
 
       <div class="search-section">
-        <input
-          v-model="searchParams.keyword"
-          type="text"
+        <n-input
+          v-model:value="searchParams.keyword"
           placeholder="搜索项目名称、客户或负责人..."
           class="search-input"
+          clearable
+          @keyup.enter="searchProjects"
         />
-        <select v-model="searchParams.status" class="status-select">
-          <option value="">所有状态</option>
-          <option value="draft">草稿</option>
-          <option value="submitted">已提交</option>
-          <option value="completed">已完成</option>
-          <option value="closed">已结项</option>
-        </select>
-        <button @click="searchProjects" class="btn btn-primary">搜索</button>
+        <n-select
+          v-model:value="searchParams.status"
+          placeholder="所有状态"
+          class="status-select"
+          style="width: 150px"
+        >
+          <n-select-option value="">所有状态</n-select-option>
+          <n-select-option value="draft">草稿</n-select-option>
+          <n-select-option value="submitted">已提交</n-select-option>
+          <n-select-option value="completed">已完成</n-select-option>
+          <n-select-option value="closed">已结项</n-select-option>
+        </n-select>
+        <n-button type="primary" @click="searchProjects">搜索</n-button>
       </div>
 
       <div class="projects-list">
-        <div v-for="project in projects.list" :key="project.id" class="project-card">
-          <div class="project-info">
-            <h3>{{ project.projectName }}</h3>
-            <p>负责人: {{ project.projectLeader }}</p>
-            <p>客户: {{ project.clientName }}</p>
-            <p>项目类型: {{ project.projectType }}</p>
-            <p>服务日期: {{ formatDate(project.serviceStartDate) }} - {{ formatDate(project.serviceEndDate) }}</p>
-            <p>服务金额: ¥{{ project.serviceAmount.toFixed(2) }}</p>
-            <p>状态: <span :class="getStatusClass(project.status)">{{ getStatusText(project.status) }}</span></p>
-          </div>
-          <div class="project-actions">
-            <NuxtLink :to="`/projects/${project.id}`" class="btn btn-secondary">查看详情</NuxtLink>
-            <NuxtLink :to="`/projects/${project.id}/edit`" class="btn btn-secondary">编辑</NuxtLink>
-            <button @click="copyProject(project.id)" class="btn btn-secondary">复制</button>
-            <button @click="deleteProject(project.id)" class="btn btn-secondary" style="background-color: #ff4d4f; color: white;">删除</button>
-          </div>
-        </div>
+        <n-data-table
+          :columns="columns"
+          :data="projects.list"
+          :pagination="false"
+          class="project-table"
+          :bordered="true"
+          :scroll-x="800"
+        />
       </div>
 
       <div class="pagination" v-if="projects.total > projects.size">
-        <button @click="changePage(projects.page - 1)" :disabled="projects.page <= 1" class="btn btn-secondary">上一页</button>
-        <span>第 {{ projects.page }} 页 / 共 {{ Math.ceil(projects.total / projects.size) }} 页</span>
-        <button @click="changePage(projects.page + 1)" :disabled="projects.page >= Math.ceil(projects.total / projects.size)" class="btn btn-secondary">下一页</button>
+        <n-pagination
+          v-model:page="projects.page"
+          v-model:page-size="projects.size"
+          :page-sizes="[10, 20, 50, 100]"
+          :item-count="projects.total"
+          show-size-picker
+          show-quick-jumper
+          show-page-sizes
+          @update:page="fetchProjects"
+          @update:page-size="fetchProjects"
+        />
       </div>
     </div>
   </Layout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, h } from 'vue'
 import type { Project } from '~/types/project'
+import { useApi } from '~/composables/useApi'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+const api = useApi()
 const projects = ref({
   list: [] as Project[],
   total: 0,
@@ -74,49 +85,87 @@ const searchParams = ref({
   status: ''
 })
 
+const columns = [
+  { title: '项目名称', key: 'projectName', ellipsis: true },
+  { title: '负责人', key: 'projectLeader' },
+  { title: '客户', key: 'clientName', ellipsis: true },
+  { title: '项目类型', key: 'projectType' },
+  {
+    title: '服务日期',
+    key: 'serviceDate',
+    render: ({ serviceStartDate, serviceEndDate }: Project) => {
+      return `${formatDate(serviceStartDate)} - ${formatDate(serviceEndDate)}`
+    }
+  },
+  {
+    title: '服务金额',
+    key: 'serviceAmount',
+    render: ({ serviceAmount }: Project) => {
+      return `¥${serviceAmount.toFixed(2)}`
+    }
+  },
+  {
+    title: '状态',
+    key: 'status',
+    render: ({ status }: Project) => {
+      const statusMap: Record<string, { text: string; type: 'default' | 'primary' | 'success' | 'warning' | 'error' }> = {
+        draft: { text: '草稿', type: 'warning' },
+        submitted: { text: '已提交', type: 'primary' },
+        completed: { text: '已完成', type: 'success' },
+        closed: { text: '已结项', type: 'default' }
+      }
+      const statusInfo = statusMap[status] || { text: status, type: 'default' }
+      return h('n-tag', { type: statusInfo.type }, { default: () => statusInfo.text })
+    }
+  },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 200,
+    render: ({ id }: Project) => {
+      return h('div', { style: { display: 'flex', gap: '8px' } }, [
+        h('n-button', {
+          type: 'primary',
+          size: 'small',
+          onClick: () => router.push(`/projects/${id}`)
+        }, { default: () => '查看详情' }),
+        h('n-button', {
+          type: 'default',
+          size: 'small',
+          onClick: () => router.push(`/projects/${id}/edit`)
+        }, { default: () => '编辑' }),
+        h('n-button', {
+          type: 'default',
+          size: 'small',
+          onClick: () => copyProject(id)
+        }, { default: () => '复制' }),
+        h('n-button', {
+          type: 'error',
+          size: 'small',
+          onClick: () => deleteProject(id)
+        }, { default: () => '删除' })
+      ])
+    }
+  }
+]
+
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
   return date.toLocaleDateString()
 }
 
-const getStatusText = (status: string) => {
-  const statusMap: Record<string, string> = {
-    draft: '草稿',
-    submitted: '已提交',
-    completed: '已完成',
-    closed: '已结项'
-  }
-  return statusMap[status] || status
-}
-
-const getStatusClass = (status: string) => {
-  const statusMap: Record<string, string> = {
-    draft: 'status-draft',
-    submitted: 'status-submitted',
-    completed: 'status-completed',
-    closed: 'status-closed'
-  }
-  return statusMap[status] || ''
-}
-
 const fetchProjects = async () => {
   try {
-    const params = new URLSearchParams()
-    params.append('page', projects.value.page.toString())
-    params.append('size', projects.value.size.toString())
-    if (searchParams.value.keyword) {
-      params.append('keyword', searchParams.value.keyword)
-    }
-    if (searchParams.value.status) {
-      params.append('status', searchParams.value.status)
-    }
-
-    const response = await $fetch(`/api/projects?${params.toString()}`)
-    if (response?.code === 0) {
-      projects.value = response.data
-    }
+    const response = await api.projects.list({
+      page: projects.value.page,
+      size: projects.value.size,
+      keyword: searchParams.value.keyword,
+      status: searchParams.value.status
+    })
+    projects.value = response
   } catch (error) {
     console.error('获取项目列表失败:', error)
+    useMessage().error('获取项目列表失败')
   }
 }
 
@@ -125,47 +174,40 @@ const searchProjects = () => {
   fetchProjects()
 }
 
-const changePage = (page: number) => {
-  projects.value.page = page
-  fetchProjects()
-}
-
 const copyProject = async (id: string) => {
   try {
-    const response = await $fetch(`/api/projects/${id}/copy`, {
-      method: 'POST'
-    })
-    if (response?.code === 0) {
-      alert('项目复制成功')
-      fetchProjects()
-    } else {
-      alert(response?.message || '复制项目失败')
-    }
+    const message = useMessage()
+    const response = await api.projects.copy(id)
+    message.success('项目复制成功')
+    fetchProjects()
   } catch (error) {
     console.error('复制项目失败:', error)
-    alert('复制项目失败')
+    useMessage().error('复制项目失败')
   }
 }
 
 const deleteProject = async (id: string) => {
-  if (!confirm('确定要删除这个项目吗？')) {
-    return
-  }
-
   try {
-    const response = await $fetch(`/api/projects/${id}`, {
-      method: 'DELETE'
+    const dialog = useDialog()
+    dialog.warning({
+      title: '确认删除',
+      content: '确定要删除这个项目吗？',
+      positiveText: '确定',
+      negativeText: '取消',
+      onPositiveClick: async () => {
+        await api.projects.delete(id)
+        useMessage().success('项目删除成功')
+        fetchProjects()
+      }
     })
-    if (response?.code === 0) {
-      alert('项目删除成功')
-      fetchProjects()
-    } else {
-      alert(response?.message || '删除项目失败')
-    }
   } catch (error) {
     console.error('删除项目失败:', error)
-    alert('删除项目失败')
+    useMessage().error('删除项目失败')
   }
+}
+
+const navigateTo = (path: string) => {
+  router.push(path)
 }
 
 onMounted(() => {
@@ -196,91 +238,33 @@ onMounted(() => {
 .search-input {
   flex: 1;
   min-width: 200px;
-  padding: 8px 12px;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  font-size: 14px;
 }
 
 .status-select {
-  padding: 8px 12px;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  font-size: 14px;
+  min-width: 150px;
 }
 
 .projects-list {
-  display: grid;
-  gap: 20px;
   margin-bottom: 20px;
 }
 
-.project-card {
+.project-table {
   background-color: white;
-  padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-}
-
-.project-info {
-  flex: 1;
-}
-
-.project-info h3 {
-  margin: 0 0 12px 0;
-  font-size: 18px;
-  color: #1890ff;
-}
-
-.project-info p {
-  margin: 4px 0;
-  font-size: 14px;
-  color: #666;
-}
-
-.project-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-left: 20px;
 }
 
 .pagination {
+  margin-top: 20px;
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.status-draft {
-  color: #faad14;
-}
-
-.status-submitted {
-  color: #1890ff;
-}
-
-.status-completed {
-  color: #52c41a;
-}
-
-.status-closed {
-  color: #8c8c8c;
 }
 
 @media (max-width: 768px) {
-  .project-card {
+  .page-header {
     flex-direction: column;
-  }
-
-  .project-actions {
-    flex-direction: row;
-    margin-left: 0;
-    margin-top: 16px;
+    align-items: flex-start;
+    gap: 16px;
   }
 
   .search-section {
@@ -288,6 +272,10 @@ onMounted(() => {
   }
 
   .search-input {
+    min-width: 100%;
+  }
+
+  .status-select {
     min-width: 100%;
   }
 }

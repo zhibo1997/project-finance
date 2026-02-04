@@ -371,27 +371,6 @@
 ## A.2 技术实现
 
 ### A.2.1 项目结构
-```
-baobiao/
-├── server/
-│   ├── api/                    # API路由
-│   ├── middleware/             # 中间件
-│   │   └── auth.ts            # 鉴权中间件
-│   ├── utils/                  # 后端工具
-│   │   ├── db.ts              # 数据库连接
-│   │   ├── response.ts        # 统一响应格式
-│   │   └── upload.ts          # 文件上传工具
-│   └── plugins/               # 服务端插件
-├── pages/                      # 页面
-├── components/                 # 组件
-├── composables/                # 组合式函数
-├── types/                      # 类型定义
-├── prisma/
-│   └── schema.prisma          # 数据库Schema
-├── uploads/                    # 上传文件目录（初期）
-├── nuxt.config.ts
-└── package.json
-```
 
 ### A.2.2 数据库连接配置
 ```typescript

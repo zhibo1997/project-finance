@@ -7,90 +7,137 @@
       </div>
 
       <div class="stats-section">
-        <div class="stat-card">
-          <h3>项目总数</h3>
-          <p class="stat-value">{{ stats.projectCount }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>已完成项目</h3>
-          <p class="stat-value">{{ stats.completedCount }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>总收入</h3>
-          <p class="stat-value">¥{{ stats.totalIncome.toFixed(2) }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>总支出</h3>
-          <p class="stat-value">¥{{ stats.totalExpense.toFixed(2) }}</p>
-        </div>
+        <n-card v-for="(stat, index) in statsData" :key="index" class="stat-card">
+          <n-statistic
+            :title="stat.title"
+            :value="stat.value"
+            :prefix="stat.prefix"
+            :suffix="stat.suffix"
+          />
+        </n-card>
       </div>
 
       <div class="quick-actions">
         <h3>快速操作</h3>
         <div class="action-buttons">
-          <NuxtLink to="/projects" class="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+          <n-button type="primary" size="large" @click="navigateTo('/projects')">
+            <template #icon>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </template>
             项目管理
-          </NuxtLink>
-          <NuxtLink to="/config" class="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3"></circle>
-              <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 1.54l4.24 4.24M20.46 20.46l-4.24-4.24M1.54 20.46l4.24-4.24"></path>
-            </svg>
+          </n-button>
+          <n-button type="primary" size="large" @click="navigateTo('/config')">
+            <template #icon>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 1.54l4.24 4.24M20.46 20.46l-4.24-4.24M1.54 20.46l4.24-4.24"></path>
+              </svg>
+            </template>
             配置管理
-          </NuxtLink>
-          <NuxtLink to="/accounting" class="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-            </svg>
+          </n-button>
+          <n-button type="primary" size="large" @click="navigateTo('/accounting')">
+            <template #icon>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </template>
             记账管理
-          </NuxtLink>
+          </n-button>
         </div>
       </div>
 
       <div class="recent-projects">
         <h3>最近项目</h3>
-        <div class="project-list">
-          <div v-for="project in recentProjects" :key="project.id" class="project-item">
-            <h4>{{ project.projectName }}</h4>
-            <p>负责人: {{ project.projectLeader }}</p>
-            <p>客户: {{ project.clientName }}</p>
-            <p>状态: {{ project.status }}</p>
-            <NuxtLink :to="`/projects/${project.id}`" class="btn btn-secondary">查看详情</NuxtLink>
-          </div>
-        </div>
+        <n-data-table
+          :columns="columns"
+          :data="recentProjects"
+          :pagination="false"
+          class="project-table"
+        />
       </div>
     </div>
   </Layout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, h } from 'vue'
 import type { Project } from '~/types/project'
+import { useApi } from '~/composables/useApi'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+const api = useApi()
 const stats = ref({
   projectCount: 0,
   completedCount: 0,
   totalIncome: 0,
   totalExpense: 0
 })
-
 const recentProjects = ref<Project[]>([])
 
-onMounted(async () => {
-  // 获取项目统计数据
-  const response = await $fetch('/api/stats')
-  if (response?.code === 0) {
-    stats.value = response.data
-  }
+const statsData = computed(() => [
+  { title: '项目总数', value: stats.value.projectCount },
+  { title: '已完成项目', value: stats.value.completedCount },
+  { title: '总收入', value: stats.value.totalIncome.toFixed(2), prefix: '¥' },
+  { title: '总支出', value: stats.value.totalExpense.toFixed(2), prefix: '¥' }
+])
 
-  // 获取最近项目
-  const projectsResponse = await $fetch('/api/projects?page=1&size=5')
-  if (projectsResponse?.code === 0) {
-    recentProjects.value = projectsResponse.data.list
+const columns = [
+  { title: '项目名称', key: 'projectName', ellipsis: true },
+  { title: '负责人', key: 'projectLeader' },
+  { title: '客户', key: 'clientName', ellipsis: true },
+  {
+    title: '状态',
+    key: 'status',
+    render: ({ status }: Project) => {
+      const statusMap: Record<string, { text: string; type: 'default' | 'primary' | 'success' | 'warning' | 'error' }> = {
+        draft: { text: '草稿', type: 'warning' },
+        submitted: { text: '已提交', type: 'primary' },
+        completed: { text: '已完成', type: 'success' },
+        closed: { text: '已结项', type: 'default' }
+      }
+      const statusInfo = statusMap[status] || { text: status, type: 'default' }
+      return h(
+        'n-tag',
+        { type: statusInfo.type },
+        { default: () => statusInfo.text }
+      )
+    }
+  },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 120,
+    render: ({ id }: Project) => h(
+      'n-button',
+      {
+        type: 'primary',
+        size: 'small',
+        onClick: () => router.push(`/projects/${id}`)
+      },
+      { default: () => '查看详情' }
+    )
+  }
+])
+
+const navigateTo = (path: string) => {
+  router.push(path)
+}
+
+onMounted(async () => {
+  try {
+    // 获取统计数据
+    stats.value = await api.stats.get()
+
+    // 获取最近项目
+    const projectsResponse = await api.projects.list({ page: 1, size: 5 })
+    recentProjects.value = projectsResponse.list
+  } catch (error) {
+    console.error('获取数据失败:', error)
+    useMessage().error('获取数据失败')
   }
 })
 </script>
@@ -124,24 +171,7 @@ onMounted(async () => {
 }
 
 .stat-card {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-.stat-card h3 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-  color: #666;
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1890ff;
-  margin: 0;
 }
 
 .quick-actions {
@@ -164,13 +194,6 @@ onMounted(async () => {
   flex-wrap: wrap;
 }
 
-.action-buttons a {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-}
-
 .recent-projects {
   background-color: white;
   padding: 20px;
@@ -184,28 +207,8 @@ onMounted(async () => {
   color: #333;
 }
 
-.project-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.project-item {
-  padding: 16px;
-  border: 1px solid #e8e8e8;
-  border-radius: 4px;
-}
-
-.project-item h4 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  color: #1890ff;
-}
-
-.project-item p {
-  margin: 4px 0;
-  font-size: 14px;
-  color: #666;
+.project-table {
+  margin-top: 16px;
 }
 
 @media (max-width: 768px) {
@@ -217,12 +220,8 @@ onMounted(async () => {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 
-  .stat-value {
-    font-size: 20px;
-  }
-
-  .project-list {
-    grid-template-columns: 1fr;
+  .action-buttons {
+    flex-direction: column;
   }
 }
 </style>

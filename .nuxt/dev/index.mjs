@@ -5,8 +5,8 @@ import nodeCrypto, { randomUUID } from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
 import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readMultipartFormData, sendStream, getResponseStatusText } from 'file://D:/%E9%A1%B9%E7%9B%AEdemo/baobiao/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://D:/%E9%A1%B9%E7%9B%AEdemo/baobiao/node_modules/@vue/shared/dist/shared.cjs.js';
-import ExcelJS from 'file://D:/%E9%A1%B9%E7%9B%AEdemo/baobiao/node_modules/exceljs/excel.js';
-import { PrismaClient } from 'file://D:/%E9%A1%B9%E7%9B%AEdemo/baobiao/node_modules/@prisma/client/default.js';
+import ExcelJS from 'exceljs';
+import { PrismaClient } from '@prisma/client';
 import { readFile, writeFile, unlink, mkdir } from 'node:fs/promises';
 import { promises, existsSync, createReadStream } from 'node:fs';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://D:/%E9%A1%B9%E7%9B%AEdemo/baobiao/node_modules/vue-bundle-renderer/dist/runtime.mjs';
@@ -2640,10 +2640,12 @@ const _lazy_KveqnA = () => Promise.resolve().then(function () { return _id__put$
 const _lazy_xEnYVu = () => Promise.resolve().then(function () { return copy_post$1; });
 const _lazy_Y51InD = () => Promise.resolve().then(function () { return export_get$1; });
 const _lazy_xmjxEO = () => Promise.resolve().then(function () { return status_put$1; });
-const _lazy_qnYWBI = () => Promise.resolve().then(function () { return records_get$1; });
+const _lazy_qnYWBI = () => Promise.resolve().then(function () { return records_get$3; });
 const _lazy_NGGHo6 = () => Promise.resolve().then(function () { return records_post$1; });
+const _lazy_q9rWp9 = () => Promise.resolve().then(function () { return records_get$1; });
 const _lazy_YCCD0v = () => Promise.resolve().then(function () { return _id__delete$1; });
 const _lazy_u6R4jS = () => Promise.resolve().then(function () { return _id__put$1; });
+const _lazy_xvsQpZ = () => Promise.resolve().then(function () { return stats_get$1; });
 const _lazy_Ak6Ix_ = () => Promise.resolve().then(function () { return upload_post$1; });
 const _lazy_acTusY = () => Promise.resolve().then(function () { return _filename__delete$1; });
 const _lazy_Nt4M_r = () => Promise.resolve().then(function () { return _filename__get$1; });
@@ -2674,8 +2676,10 @@ const handlers = [
   { route: '/api/projects/:id/status', handler: _lazy_xmjxEO, lazy: true, middleware: false, method: "put" },
   { route: '/api/projects/:projectId/records', handler: _lazy_qnYWBI, lazy: true, middleware: false, method: "get" },
   { route: '/api/projects/:projectId/records', handler: _lazy_NGGHo6, lazy: true, middleware: false, method: "post" },
+  { route: '/api/records', handler: _lazy_q9rWp9, lazy: true, middleware: false, method: "get" },
   { route: '/api/records/:id', handler: _lazy_YCCD0v, lazy: true, middleware: false, method: "delete" },
   { route: '/api/records/:id', handler: _lazy_u6R4jS, lazy: true, middleware: false, method: "put" },
+  { route: '/api/stats', handler: _lazy_xvsQpZ, lazy: true, middleware: false, method: "get" },
   { route: '/api/upload', handler: _lazy_Ak6Ix_, lazy: true, middleware: false, method: "post" },
   { route: '/api/upload/:filename', handler: _lazy_acTusY, lazy: true, middleware: false, method: "delete" },
   { route: '/api/upload/:filename', handler: _lazy_Nt4M_r, lazy: true, middleware: false, method: "get" },
@@ -3656,7 +3660,7 @@ async function getUserRoleInProject$2(projectId, userId) {
   });
   return (member == null ? void 0 : member.role) || "member";
 }
-const records_get = defineEventHandler(async (event) => {
+const records_get$2 = defineEventHandler(async (event) => {
   var _a, _b;
   try {
     const projectId = (_a = event.context.params) == null ? void 0 : _a.projectId;
@@ -3680,9 +3684,9 @@ const records_get = defineEventHandler(async (event) => {
   }
 });
 
-const records_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const records_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: records_get
+  default: records_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const records_post = defineEventHandler(async (event) => {
@@ -3734,6 +3738,43 @@ const records_post = defineEventHandler(async (event) => {
 const records_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: records_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const records_get = defineEventHandler(async (event) => {
+  try {
+    const query = getQuery$1(event);
+    const { keyword, projectId, recordType, page = 1, size = 20 } = query;
+    const where = {};
+    if (projectId) where.projectId = projectId;
+    if (recordType) where.recordType = recordType;
+    if (keyword) {
+      where.OR = [
+        { description: { contains: keyword } },
+        { applicant: { contains: keyword } },
+        { invoiceNo: { contains: keyword } },
+        { payer: { contains: keyword } },
+        { remark: { contains: keyword } }
+      ];
+    }
+    const [total, list] = await Promise.all([
+      prisma.accountingRecord.count({ where }),
+      prisma.accountingRecord.findMany({
+        where,
+        orderBy: { recordDate: "desc" },
+        skip: (Number(page) - 1) * Number(size),
+        take: Number(size)
+      })
+    ]);
+    return success({ total, list, page: Number(page), size: Number(size) });
+  } catch (err) {
+    console.error("\u83B7\u53D6\u8BB0\u8D26\u8BB0\u5F55\u5931\u8D25:", err);
+    return error("\u83B7\u53D6\u8BB0\u8D26\u8BB0\u5F55\u5931\u8D25");
+  }
+});
+
+const records_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: records_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
 async function getUserRoleInProject$1(projectId, userId) {
@@ -3803,6 +3844,37 @@ const _id__put = defineEventHandler(async (event) => {
 const _id__put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: _id__put
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const stats_get = defineEventHandler(async (event) => {
+  try {
+    const [projectCount, completedCount, totalIncome, totalExpense] = await Promise.all([
+      prisma.project.count(),
+      prisma.project.count({ where: { status: "completed" } }),
+      prisma.accountingRecord.aggregate({
+        _sum: { amount: true },
+        where: { recordType: "income" }
+      }),
+      prisma.accountingRecord.aggregate({
+        _sum: { amount: true },
+        where: { recordType: "expense" }
+      })
+    ]);
+    return success({
+      projectCount,
+      completedCount,
+      totalIncome: totalIncome._sum.amount || 0,
+      totalExpense: totalExpense._sum.amount || 0
+    });
+  } catch (err) {
+    console.error("\u83B7\u53D6\u7EDF\u8BA1\u6570\u636E\u5931\u8D25:", err);
+    return error("\u83B7\u53D6\u7EDF\u8BA1\u6570\u636E\u5931\u8D25");
+  }
+});
+
+const stats_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: stats_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
