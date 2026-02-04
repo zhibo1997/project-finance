@@ -27,13 +27,8 @@
           placeholder="所有状态"
           class="status-select"
           style="width: 150px"
-        >
-          <n-select-option value="">所有状态</n-select-option>
-          <n-select-option value="draft">草稿</n-select-option>
-          <n-select-option value="submitted">已提交</n-select-option>
-          <n-select-option value="completed">已完成</n-select-option>
-          <n-select-option value="closed">已结项</n-select-option>
-        </n-select>
+          :options="statusOptions"
+        />
         <n-button type="primary" @click="searchProjects">搜索</n-button>
       </div>
 
@@ -79,6 +74,14 @@ const projects = ref({
   page: 1,
   size: 20
 })
+
+const statusOptions = [
+  { label: '所有状态', value: '' },
+  { label: '草稿', value: 'draft' },
+  { label: '已提交', value: 'submitted' },
+  { label: '已完成', value: 'completed' },
+  { label: '已结项', value: 'closed' }
+]
 
 const searchParams = ref({
   keyword: '',

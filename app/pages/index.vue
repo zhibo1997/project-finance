@@ -12,7 +12,6 @@
             :title="stat.title"
             :value="stat.value"
             :prefix="stat.prefix"
-            :suffix="stat.suffix"
           />
         </n-card>
       </div>
@@ -121,7 +120,7 @@ const columns = [
       { default: () => '查看详情' }
     )
   }
-])
+]
 
 const navigateTo = (path: string) => {
   router.push(path)

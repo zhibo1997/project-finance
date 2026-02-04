@@ -27,26 +27,15 @@
           placeholder="所有项目"
           class="project-select"
           style="width: 200px"
-        >
-          <n-select-option value="">所有项目</n-select-option>
-          <n-select-option
-            v-for="project in projects"
-            :key="project.id"
-            :value="project.id"
-          >
-            {{ project.projectName }}
-          </n-select-option>
-        </n-select>
+          :options="projectOptions"
+        />
         <n-select
           v-model:value="searchParams.recordType"
           placeholder="所有类型"
           class="record-type-select"
           style="width: 120px"
-        >
-          <n-select-option value="">所有类型</n-select-option>
-          <n-select-option value="income">收入</n-select-option>
-          <n-select-option value="expense">支出</n-select-option>
-        </n-select>
+          :options="recordTypeOptions"
+        />
         <n-button type="primary" @click="searchRecords">搜索</n-button>
       </div>
 
@@ -95,6 +84,19 @@ const records = ref({
 })
 
 const projects = ref<Project[]>([])
+const projectOptions = computed(() => [
+  { label: '所有项目', value: '' },
+  ...projects.value.map(project => ({
+    label: project.projectName,
+    value: project.id
+  }))
+])
+
+const recordTypeOptions = [
+  { label: '所有类型', value: '' },
+  { label: '收入', value: 'income' },
+  { label: '支出', value: 'expense' }
+]
 
 const searchParams = ref({
   keyword: '',

@@ -1,3 +1,5 @@
+
+import AutoImport from "unplugin-auto-import/vite";
 export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: [],
@@ -20,5 +22,24 @@ export default defineNuxtConfig({
     plugins: {
       autoprefixer: {}
     }
+  },
+  vite: {
+    plugins: [
+      AutoImport({
+        imports: [
+          {
+            'naive-ui': [
+              'useDialog',
+              'useMessage',
+              'useNotification',
+              'useLoadingBar'
+            ]
+          }
+        ]
+      })
+    ]
+  },
+  dir: {
+    pages: 'app/pages'
   }
 })
