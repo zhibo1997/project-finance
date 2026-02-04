@@ -3,8 +3,23 @@
 ## 文档说明
 
 本文档按模块拆分，每个模块包含【业务需求】+【技术实现】，支持多Agent并发开发。
-目前项目已经开发了一个基础的原型，代码放在了/src-old文件夹下，本次开发的内容可以参考当前原型结合当前文档做完全重构,代码放到新的src,同时开发过程中不要启动服务器，我本身已经启动了，直接使用并发开发就可以
-
+目前项目已经开发了一个基础的原型，前端代码放在了/src-old文件夹下，本次开发的内容可以参考当前原型结合当前文档做完全重构,app,同时开发过程中不要启动服务器，我本身已经启动了，直接使用并发开发就可以
+同时nuxt框架为
+my-nuxt-app/
+├── app/                 # 核心应用代码目录（所有前端逻辑集中于此）
+│   ├── components/      # 可复用 Vue 组件（自动导入，无需 import）
+│   ├── pages/           # 页面组件，基于文件系统自动生成路由
+│   ├── layouts/         # 布局模板（如 default.vue）
+│   ├── plugins/         # 应用插件（在 Vue 实例创建前运行）
+│   ├── assets/          # 需要构建处理的静态资源（如 SCSS、图片）
+│   ├── composables/     # 组合式函数（Vue 3 Composition API 风格）
+│   └── app.vue          # 应用根组件（替代旧版的 layouts/default.vue）
+├── server/              # 服务端逻辑（API 路由、中间件、Nitro 函数等）
+├── public/              # 静态资源（直接复制到根路径，如 favicon.ico）
+├── shared/              # （可选）前后端共享的工具函数或类型定义 
+├── nuxt.config.ts       # 项目配置文件（TypeScript 支持）
+├── package.json
+└── .gitignore
 ---
 
 ## 技术架构总览
@@ -371,27 +386,6 @@
 ## A.2 技术实现
 
 ### A.2.1 项目结构
-```
-baobiao/
-├── server/
-│   ├── api/                    # API路由
-│   ├── middleware/             # 中间件
-│   │   └── auth.ts            # 鉴权中间件
-│   ├── utils/                  # 后端工具
-│   │   ├── db.ts              # 数据库连接
-│   │   ├── response.ts        # 统一响应格式
-│   │   └── upload.ts          # 文件上传工具
-│   └── plugins/               # 服务端插件
-├── pages/                      # 页面
-├── components/                 # 组件
-├── composables/                # 组合式函数
-├── types/                      # 类型定义
-├── prisma/
-│   └── schema.prisma          # 数据库Schema
-├── uploads/                    # 上传文件目录（初期）
-├── nuxt.config.ts
-└── package.json
-```
 
 ### A.2.2 数据库连接配置
 ```typescript
