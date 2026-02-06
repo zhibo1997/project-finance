@@ -18,13 +18,14 @@
     "echarts": "^5.x",
     "exceljs": "^4.x",
     "naive-ui": "^2.x",
-    "nuxt": "^4.x",
+    "nuxt": "^3.x",
     "vue": "^3.x"
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.x",
+    "@types/node": "^22.x",
     "prisma": "^5.x",
-    "typescript": "^5.4.x",
-    "vue-tsc": "^3.2.4"
+    "typescript": "^5.x",
+    "vue-tsc": "^1.x"
   }
 }
