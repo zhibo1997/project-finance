@@ -1,46 +1,28 @@
 export default defineNuxtConfig({
-  compatibilityDate: '2024-11-01',
-  devtools: { enabled: true },
-  modules: ['@nuxt/ui', '@nuxtjs/tailwindcss'],
-  css: ['~/assets/css/main.css'],
+  // 兼容性配置（Nuxt 4 必须）
+  compatibilityDate: "2025-07-15",
+
+  // 关闭 SSR（客户端渲染模式）
+  ssr: false,
+
+
+  // 模块配置
+  modules: [],
+
+  // 目录结构配置
+  srcDir: "app/",
+  serverDir: "server/",
+
+  // 应用配置
   app: {
     head: {
-      title: '项目维度财务数据系统',
-      meta: [
-        { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: '项目维度财务数据管理系统' }
-      ]
+      title: '项目维度财务数据系统'
     }
   },
-  postcss: {
-    plugins: {
-      tailwindcss: {},
-      autoprefixer: {},
-    },
-  },
-  typescript: {
-    strict: true,
-    typeCheck: false
-  },
-  nitro: {
-    compressPublicAssets: true,
-    preset: 'node-server'
-  },
-  ui: {
-    // 禁用 Google 字体服务，避免连接超时错误
-    fonts: false
-  },
-  runtimeConfig: {
-    public: {
-      apiBase: '/api'
-    },
-    mysql: {
-      host: process.env.MYSQL_HOST || '127.0.0.1',
-      port: process.env.MYSQL_PORT || '3306',
-      user: process.env.MYSQL_USER || 'root',
-      password: process.env.MYSQL_PASSWORD || '123456',
-      database: process.env.MYSQL_DATABASE || 'ai-chat-database'
-    }
-  }
+
+  // 开发工具配置
+  devtools: { enabled: true },
+
+  // 确保组件自动导入开启（Nuxt 4 默认配置）
+  components: true
 })
