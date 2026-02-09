@@ -52,7 +52,7 @@ const filteredProjects = computed(() => {
 })
 
 const handleAddProject = () => {
-  window.location.href = 'http://localhost:3001/application'
+  navigateTo('/projects/create')
 }
 
 const handleBookkeeping = () => {
@@ -119,14 +119,16 @@ const navigateToDashboard = () => {
             </p>
           </div>
           <div class="flex gap-3">
-            <button
+            <UButton
               v-if="canCreateProjects"
               @click="handleAddProject"
-              class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+              color="blue"
+              size="md"
+              class="font-semibold shadow-sm"
             >
-              <Plus :size="18" />
+              <Plus :size="18" class="mr-2" />
               新增项目
-            </button>
+            </UButton>
           </div>
         </div>
 
@@ -135,35 +137,38 @@ const navigateToDashboard = () => {
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-2">
               <span class="text-sm font-medium text-gray-700">项目状态筛选:</span>
-              <button
+              <UButton
                 @click="statusFilter = 'all'"
-                class="px-3 py-1.5 text-sm rounded-full transition-colors"
+                size="sm"
                 :class="statusFilter === 'all'
                   ? 'bg-blue-100 text-blue-700'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                class="rounded-full px-3 py-1.5"
               >
                 全部
-              </button>
-              <button
+              </UButton>
+              <UButton
                 @click="statusFilter = '已完成'"
-                class="px-3 py-1.5 text-sm rounded-full transition-colors flex items-center gap-1"
+                size="sm"
                 :class="statusFilter === '已完成'
                   ? 'bg-green-100 text-green-700'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                class="rounded-full px-3 py-1.5 flex items-center gap-1"
               >
-                <CheckCircle :size="14" />
+                <CheckCircle :size="14" class="mr-1" />
                 已完成
-              </button>
-              <button
+              </UButton>
+              <UButton
                 @click="statusFilter = '立项中'"
-                class="px-3 py-1.5 text-sm rounded-full transition-colors flex items-center gap-1"
+                size="sm"
                 :class="statusFilter === '立项中'
                   ? 'bg-yellow-100 text-yellow-700'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                class="rounded-full px-3 py-1.5 flex items-center gap-1"
               >
-                <Clock :size="14" />
+                <Clock :size="14" class="mr-1" />
                 立项中(草稿箱)
-              </button>
+              </UButton>
             </div>
 
             <div class="flex items-center gap-6 text-sm">
@@ -242,28 +247,35 @@ const navigateToDashboard = () => {
                     <!-- 右侧固定列 -->
                     <td class="px-3 py-2 bg-white sticky right-0 z-20">
                       <div class="flex items-center gap-2">
-                        <button
+                        <UButton
                           @click="handleBookkeeping"
-                          class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                          size="sm"
+                          variant="outline"
+                          :class="canBookkeepingIncome && canBookkeepingExpense ? 'text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100 hover:border-blue-300' : 'text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100 hover:border-blue-300'"
+                          class="flex items-center gap-1"
                         >
                           <span class="text-base">￥</span>
                           {{ canBookkeepingIncome && canBookkeepingExpense ? '记账' : '支出记账' }}
-                        </button>
-                        <button
+                        </UButton>
+                        <UButton
                           v-if="canEditProjects && project.status === '立项中'"
                           @click="handleEditProject(project.id)"
-                          class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-orange-600 bg-orange-50 rounded-md hover:bg-orange-100 transition-colors"
+                          size="sm"
+                          variant="outline"
+                          class="text-orange-600 bg-orange-50 border-orange-200 hover:bg-orange-100 hover:border-orange-300 flex items-center gap-1"
                         >
-                          <Edit3 :size="14" />
+                          <Edit3 :size="14" class="mr-1" />
                           修改
-                        </button>
-                        <button
+                        </UButton>
+                        <UButton
                           @click="navigateToDashboard"
-                          class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                          size="sm"
+                          variant="outline"
+                          class="text-gray-600 bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300 flex items-center gap-1"
                         >
-                          <LayoutGrid :size="14" />
+                          <LayoutGrid :size="14" class="mr-1" />
                           项目看板
-                        </button>
+                        </UButton>
                       </div>
                     </td>
                   </tr>

@@ -4,23 +4,23 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 // 项目表
 model projects {
   id                  String    @id @default(uuid())
-  project_name        String    @db.VarChar(200)
-  project_leader      String    @db.VarChar(100)
-  client_name         String?   @db.VarChar(200)
-  project_type        String?   @db.VarChar(100)
+  project_name        String
+  project_leader      String
+  client_name         String?
+  project_type        String?
   service_start_date  DateTime?
   service_end_date    DateTime?
-  service_amount      Decimal?  @db.Decimal(15, 2)
+  service_amount      Decimal?
   status              String    @default("draft")
-  form_data           Json?
-  created_by          String?   @db.VarChar(36)
+  form_data           String?
+  created_by          String?
   created_at          DateTime  @default(now())
   updated_at          DateTime  @updatedAt
 
@@ -35,9 +35,9 @@ model projects {
 // 项目成员表
 model project_members {
   id          String    @id @default(uuid())
-  project_id  String    @db.VarChar(36)
-  user_id     String    @db.VarChar(36)
-  user_name   String?   @db.VarChar(100)
+  project_id  String
+  user_id     String
+  user_name   String?
   role        String    @default("member")
   created_at  DateTime  @default(now())
 
@@ -49,20 +49,20 @@ model project_members {
 // 记账表
 model accounting_records {
   id                  String    @id @default(uuid())
-  project_id          String    @db.VarChar(36)
+  project_id          String
   record_type         String
-  approval_id         String    @db.VarChar(100)
+  approval_id         String
   record_date         DateTime
-  amount              Decimal   @db.Decimal(15, 2)
-  category_id         String?   @db.VarChar(36)
+  amount              Decimal
+  category_id         String?
   description         String?
-  applicant           String?   @db.VarChar(100)
-  invoice_no          String?   @db.VarChar(100)
-  payer               String?   @db.VarChar(200)
-  attachments         Json?
+  applicant           String?
+  invoice_no          String?
+  payer               String?
+  attachments         String?
   remark              String?
-  created_by          String    @db.VarChar(36)
-  created_by_name     String?   @db.VarChar(100)
+  created_by          String
+  created_by_name     String?
   created_at          DateTime  @default(now())
   updated_at          DateTime  @updatedAt
 
@@ -76,7 +76,7 @@ model accounting_records {
 // 费用类别字典
 model expense_categories {
   id          String    @id @default(uuid())
-  name        String    @db.VarChar(100)
+  name        String
   sort_order  Int       @default(0)
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
@@ -85,7 +85,7 @@ model expense_categories {
 // 采购内容字典
 model purchase_contents {
   id          String    @id @default(uuid())
-  name        String    @db.VarChar(200)
+  name        String
   sort_order  Int       @default(0)
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
@@ -94,9 +94,9 @@ model purchase_contents {
 // 员工成本配置表
 model employee_cost_config {
   id          String    @id @default(uuid())
-  level_key   String    @db.VarChar(50)
-  level_name  String    @db.VarChar(100)
-  daily_cost  Decimal   @db.Decimal(10, 2)
+  level_key   String
+  level_name  String
+  daily_cost  Decimal
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
 

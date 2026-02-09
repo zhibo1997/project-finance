@@ -5,7 +5,6 @@ export default defineNuxtConfig({
   // 关闭 SSR（客户端渲染模式）
   ssr: false,
 
-
   // 模块配置
   modules: [],
 
@@ -24,5 +23,10 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   // 确保组件自动导入开启（Nuxt 4 默认配置）
-  components: true
+  components: true,
+
+  // CSS 配置
+  css: [
+    '~/assets/css/main.css'
+  ],
 })
