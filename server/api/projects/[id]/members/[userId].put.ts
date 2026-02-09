@@ -1,5 +1,5 @@
-import prisma from '~/server/utils/db'
-import { success, error } from '~/server/utils/response'
+import prisma from '../../../../utils/db'
+import { success, error } from '../../../../utils/response'
 
 export default defineEventHandler(async (event) => {
   const id = event.context.params?.id

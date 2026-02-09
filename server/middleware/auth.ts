@@ -1,4 +1,4 @@
-import { MOCK_USERS, ROLE_CONFIGS } from '~/server/utils/auth'
+import { MOCK_USERS, ROLE_CONFIGS } from '../utils/auth'
 
 export default defineEventHandler((event) => {
   // 模拟用户认证 - 在实际项目中应该使用真实的认证机制

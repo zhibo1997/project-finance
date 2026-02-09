@@ -1,7 +1,7 @@
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
-import { error, success } from '~/server/utils/response'
+import { error, success } from '../utils/response'
 
 export default defineEventHandler(async (event) => {
   const formData = await readMultipartFormData(event)

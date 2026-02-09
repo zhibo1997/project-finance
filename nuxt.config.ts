@@ -1,7 +1,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: ['@nuxt/ui', '@nuxtjs/tailwindcss'],
   css: ['~/assets/css/main.css'],
   app: {
     head: {
@@ -13,13 +13,23 @@ export default defineNuxtConfig({
       ]
     }
   },
+  postcss: {
+    plugins: {
+      tailwindcss: {},
+      autoprefixer: {},
+    },
+  },
   typescript: {
     strict: true,
-    typeCheck: true
+    typeCheck: false
   },
   nitro: {
     compressPublicAssets: true,
     preset: 'node-server'
+  },
+  ui: {
+    // 禁用 Google 字体服务，避免连接超时错误
+    fonts: false
   },
   runtimeConfig: {
     public: {

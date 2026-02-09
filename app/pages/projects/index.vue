@@ -1,133 +1,279 @@
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { Plus, CheckCircle, Clock, LayoutGrid, Edit3, User, Shield, Users, Building2 } from 'lucide-vue-next'
+import { PROJECT_LIST_DATA, type Project, type ProjectStatus, formatCurrency } from '~/data/projectListData'
+import { useAuth } from '~/composables/useAuth'
+import type { UserRole } from '~/types/user'
+
+const projects = ref<Project[]>(PROJECT_LIST_DATA)
+const statusFilter = ref<ProjectStatus | 'all'>('all')
+
+// 权限管理
+const {
+  currentUser,
+  currentRoleConfig,
+  switchRole,
+  initAuth,
+  canViewAllProjects,
+  canCreateProjects,
+  canBookkeepingIncome,
+  canBookkeepingExpense,
+  canEditProjects
+} = useAuth()
+
+onMounted(() => {
+  initAuth()
+})
+
+// 根据角色过滤项目
+const filteredProjects = computed(() => {
+  let filtered = projects.value
+
+  // 根据角色过滤项目
+  if (!canViewAllProjects.value) {
+    // 项目经理只能看到自己负责的项目
+    if (currentUser.value.role === 'project_manager') {
+      filtered = filtered.filter(project => project.projectLeader === currentUser.value.name)
+    }
+    // 项目成员只能看到自己参与的项目（这里简化为看到所有项目，实际需要根据成员列表过滤）
+    // 为了演示，项目成员也只能看到特定项目
+    if (currentUser.value.role === 'project_member') {
+      // 假设项目成员只能看到赵六和王五负责的项目
+      filtered = filtered.filter(project => ['赵六', '王五'].includes(project.projectLeader))
+    }
+  }
+
+  // 根据状态过滤
+  if (statusFilter.value !== 'all') {
+    filtered = filtered.filter(project => project.status === statusFilter.value)
+  }
+
+  return filtered
+})
+
+const handleAddProject = () => {
+  window.location.href = 'http://localhost:3001/application'
+}
+
+const handleBookkeeping = () => {
+  window.open('https://alidocs.dingtalk.com/i/nodes/dQPGYqjpJYpZo0qYtzRYj2vQVakx1Z5N?corpId=ding5aaad5806ea95bd7ee0f45d8e4f7c288&utm_medium=im_card&iframeQuery=viewId%3DBO1vR6p%26utm_medium%3Dim_card%26sheetId%3DJExS222%26utm_source%3Dim&utm_scene=team_space&utm_source=im', '_blank')
+}
+
+const handleEditProject = (projectId: string) => {
+  console.log('编辑项目:', projectId)
+  navigateTo('/projects/create')
+}
+
+const navigateToDashboard = () => {
+  navigateTo('/')
+}
+</script>
+
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <div class="px-4 py-6 sm:px-0">
-        <h1 class="text-3xl font-bold text-gray-900 mb-6">项目管理</h1>
-
-        <!-- 项目列表 -->
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
-          <div class="p-6">
-            <div class="flex justify-between items-center mb-6">
-              <h2 class="text-xl font-semibold text-gray-800">项目列表</h2>
-              <NuxtLink
-                to="/projects/create"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                新建项目
-              </NuxtLink>
+  <div class="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] font-sans pb-12 flex flex-col">
+    <!-- 模拟登录状态和角色切换 -->
+    <div class="bg-white border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <User class="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">{{ currentUser.name }}</p>
+                <p class="text-xs text-gray-500">{{ currentUser.email }}</p>
+              </div>
             </div>
-
-            <!-- 项目搜索和筛选 -->
-            <div class="mb-6">
-              <div class="flex flex-col md:flex-row gap-4">
-                <div class="flex-1">
-                  <input
-                    v-model="searchTerm"
-                    type="text"
-                    placeholder="搜索项目名称、负责人或客户..."
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <select
-                  v-model="statusFilter"
-                  class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">全部状态</option>
-                  <option value="draft">草稿</option>
-                  <option value="submitted">已提交</option>
-                  <option value="completed">已完成</option>
-                  <option value="closed">已结项</option>
-                </select>
+            <div class="h-6 w-px bg-gray-300"></div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-600">角色:</span>
+              <div class="flex bg-gray-100 rounded-lg p-1">
                 <button
-                  @click="fetchProjects"
-                  class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  v-for="(config, role) in { admin: '管理员', project_manager: '项目经理', project_member: '项目成员' }"
+                  :key="role"
+                  @click="switchRole(role as UserRole)"
+                  class="px-3 py-1 text-sm rounded-md transition-colors flex items-center gap-1"
+                  :class="currentUser.role === role
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-600 hover:bg-gray-200'"
                 >
-                  搜索
+                  {{ config }}
                 </button>
               </div>
             </div>
+          </div>
+          <div class="text-xs text-gray-500">{{ currentRoleConfig.description }}</div>
+        </div>
+      </div>
+    </div>
 
-            <!-- 项目列表 -->
-            <div class="space-y-4">
-              <div
-                v-for="project in projects"
-                :key="project.id"
-                class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+    <div class="flex-1 flex flex-col">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col">
+        <!-- 页面标题和操作按钮 -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">项目列表</h1>
+            <p class="mt-2 text-sm text-gray-600">
+              {{ currentRoleConfig.description }}
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <button
+              v-if="canCreateProjects"
+              @click="handleAddProject"
+              class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              <Plus :size="18" />
+              新增项目
+            </button>
+          </div>
+        </div>
+
+        <!-- 筛选和统计区域 -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium text-gray-700">项目状态筛选:</span>
+              <button
+                @click="statusFilter = 'all'"
+                class="px-3 py-1.5 text-sm rounded-full transition-colors"
+                :class="statusFilter === 'all'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
               >
-                <div class="flex justify-between items-start">
-                  <div class="flex-1">
-                    <h3 class="text-lg font-semibold text-gray-900">{{ project.project_name }}</h3>
-                    <div class="mt-2 text-sm text-gray-600">
-                      <p>负责人: {{ project.project_leader }}</p>
-                      <p>客户: {{ project.client_name }}</p>
-                      <p>服务金额: ¥{{ project.service_amount }}</p>
-                      <p>状态:
-                        <span
-                          :class="getStatusBadgeClass(project.status)"
-                          class="px-2 py-1 rounded-full text-xs font-medium"
+                全部
+              </button>
+              <button
+                @click="statusFilter = '已完成'"
+                class="px-3 py-1.5 text-sm rounded-full transition-colors flex items-center gap-1"
+                :class="statusFilter === '已完成'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+              >
+                <CheckCircle :size="14" />
+                已完成
+              </button>
+              <button
+                @click="statusFilter = '立项中'"
+                class="px-3 py-1.5 text-sm rounded-full transition-colors flex items-center gap-1"
+                :class="statusFilter === '立项中'
+                  ? 'bg-yellow-100 text-yellow-700'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+              >
+                <Clock :size="14" />
+                立项中(草稿箱)
+              </button>
+            </div>
+
+            <div class="flex items-center gap-6 text-sm">
+              <div class="text-gray-600">
+                总项目数: <span class="font-semibold text-gray-900">{{ projects.length }}</span>
+              </div>
+              <div class="text-gray-600">
+                已筛选: <span class="font-semibold text-gray-900">{{ filteredProjects.length }}</span>
+              </div>
+              <div class="text-gray-600">
+                总金额: <span class="font-semibold text-blue-600">{{
+                  formatCurrency(filteredProjects.reduce((sum, p) => sum + p.serviceAmount, 0))
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 项目表格 -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex-1 flex flex-col">
+          <div class="overflow-hidden flex-1 flex flex-col" style="height: 600px;">
+            <div class="overflow-x-auto overflow-y-auto flex-1">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 text-gray-600 text-sm font-medium sticky top-0 z-10">
+                  <tr>
+                    <!-- 左侧固定列 -->
+                    <th class="px-3 py-2 border-b border-gray-200 bg-white shadow-sm sticky left-0 z-20 min-w-[120px]">项目编号</th>
+                    <th class="px-3 py-2 border-b border-gray-200 bg-white shadow-sm sticky left-[120px] z-10 min-w-[200px]">项目名称</th>
+                    <th class="px-3 py-2 border-b border-gray-200 bg-white shadow-sm sticky left-[320px] z-10 min-w-[100px]">负责人</th>
+                    <th class="px-3 py-2 border-b border-gray-200 bg-white shadow-sm sticky left-[420px] z-10 min-w-[150px]">客户</th>
+                    <!-- 可滚动列 -->
+                    <th class="px-3 py-2 border-b border-gray-200 min-w-[100px]">服务开始时间</th>
+                    <th class="px-3 py-2 border-b border-gray-200 min-w-[100px]">服务结束时间</th>
+                    <th class="px-3 py-2 border-b border-gray-200 min-w-[120px]">服务金额</th>
+                    <th class="px-3 py-2 border-b border-gray-200 min-w-[80px]">是否跨年</th>
+                    <th class="px-3 py-2 border-b border-gray-200 min-w-[100px]">项目状态</th>
+                    <th class="px-3 py-2 border-b border-gray-200 min-w-[120px]">项目归属</th>
+                    <!-- 右侧固定列 -->
+                    <th class="px-3 py-2 border-b border-gray-200 bg-white shadow-sm sticky right-0 z-20 min-w-[280px]">操作</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr
+                    v-for="project in filteredProjects"
+                    :key="project.id"
+                    class="hover:bg-gray-50 transition-colors text-sm"
+                  >
+                    <!-- 左侧固定列 -->
+                    <td class="px-3 py-2 font-medium text-gray-900 bg-white sticky left-0 z-20">{{ project.id }}</td>
+                    <td class="px-3 py-2 bg-white sticky left-[120px] z-10 font-medium text-gray-900 max-w-[200px] truncate" :title="project.projectName">{{ project.projectName }}</td>
+                    <td class="px-3 py-2 bg-white sticky left-[320px] z-10 text-gray-700">{{ project.projectLeader }}</td>
+                    <td class="px-3 py-2 bg-white sticky left-[420px] z-10 text-gray-700 max-w-[150px] truncate" :title="project.clientName">{{ project.clientName }}</td>
+                    <!-- 可滚动列 -->
+                    <td class="px-3 py-2 text-gray-700">{{ project.serviceStartDate }}</td>
+                    <td class="px-3 py-2 text-gray-700">{{ project.serviceEndDate }}</td>
+                    <td class="px-3 py-2 font-semibold text-green-600">{{ formatCurrency(project.serviceAmount) }}</td>
+                    <td class="px-3 py-2">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                        :class="project.isCrossYear
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-gray-100 text-gray-800'"
+                      >
+                        {{ project.isCrossYear ? '是' : '否' }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-2">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                        :class="project.status === '已完成'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'"
+                      >
+                        {{ project.status === '已完成' ? '已完成' : '立项中' }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-2 text-gray-700">{{ project.projectType }}</td>
+                    <!-- 右侧固定列 -->
+                    <td class="px-3 py-2 bg-white sticky right-0 z-20">
+                      <div class="flex items-center gap-2">
+                        <button
+                          @click="handleBookkeeping"
+                          class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
                         >
-                          {{ getStatusText(project.status) }}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                  <div class="ml-4 flex space-x-2">
-                    <NuxtLink
-                      :to="`/projects/${project.id}`"
-                      class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-md text-sm transition-colors"
-                    >
-                      查看
-                    </NuxtLink>
-                    <NuxtLink
-                      :to="`/projects/${project.id}/edit`"
-                      class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm transition-colors"
-                    >
-                      编辑
-                    </NuxtLink>
-                    <NuxtLink
-                      :to="`/projects/${project.id}/copy`"
-                      class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm transition-colors"
-                    >
-                      复制
-                    </NuxtLink>
-                    <button
-                      @click="deleteProject(project.id)"
-                      class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors"
-                    >
-                      删除
-                    </button>
-                  </div>
-                </div>
-              </div>
+                          <span class="text-base">￥</span>
+                          {{ canBookkeepingIncome && canBookkeepingExpense ? '记账' : '支出记账' }}
+                        </button>
+                        <button
+                          v-if="canEditProjects && project.status === '立项中'"
+                          @click="handleEditProject(project.id)"
+                          class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-orange-600 bg-orange-50 rounded-md hover:bg-orange-100 transition-colors"
+                        >
+                          <Edit3 :size="14" />
+                          修改
+                        </button>
+                        <button
+                          @click="navigateToDashboard"
+                          class="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                        >
+                          <LayoutGrid :size="14" />
+                          项目看板
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-
-            <!-- 分页 -->
-            <div v-if="total > 0" class="mt-6 flex justify-between items-center">
-              <div class="text-sm text-gray-700">
-                显示 {{ (currentPage - 1) * pageSize + 1 }} 到 {{ Math.min(currentPage * pageSize, total) }} 条，共 {{ total }} 条
-              </div>
-              <div class="flex space-x-2">
-                <button
-                  @click="currentPage--"
-                  :disabled="currentPage === 1"
-                  class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  上一页
-                </button>
-                <button
-                  @click="currentPage++"
-                  :disabled="currentPage * pageSize >= total"
-                  class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  下一页
-                </button>
-              </div>
-            </div>
-
-            <!-- 空状态 -->
-            <div v-if="total === 0" class="text-center py-12">
-              <p class="text-gray-500">暂无项目数据</p>
-            </div>
+          </div>
+          <!-- 表格底部 -->
+          <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-sm text-gray-600">
+            显示 {{ filteredProjects.length }} 条项目记录
           </div>
         </div>
       </div>
@@ -135,75 +281,31 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-
-const searchTerm = ref('')
-const statusFilter = ref('')
-const currentPage = ref(1)
-const pageSize = ref(10)
-const projects = ref<any[]>([])
-const total = ref(0)
-
-const getStatusText = (status: string) => {
-  const statusMap: Record<string, string> = {
-    draft: '草稿',
-    submitted: '已提交',
-    completed: '已完成',
-    closed: '已结项'
-  }
-  return statusMap[status] || status
-}
-
-const getStatusBadgeClass = (status: string) => {
-  const classMap: Record<string, string> = {
-    draft: 'bg-yellow-100 text-yellow-800',
-    submitted: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
-    closed: 'bg-gray-100 text-gray-800'
-  }
-  return classMap[status] || 'bg-gray-100 text-gray-800'
-}
-
-const fetchProjects = async () => {
-  try {
-    const queryParams = new URLSearchParams({
-      page: currentPage.value.toString(),
-      size: pageSize.value.toString(),
-      keyword: searchTerm.value,
-      status: statusFilter.value
-    })
-
-    const response = await $fetch(`/api/projects?${queryParams.toString()}`)
-    if (response.code === 0 && response.data) {
-      projects.value = response.data.list || []
-      total.value = response.data.total || 0
-    }
-  } catch (error) {
-    console.error('获取项目列表失败:', error)
-  }
-}
-
-const deleteProject = async (id: string) => {
-  if (!confirm('确定要删除该项目吗？')) return
-
-  try {
-    const response = await $fetch(`/api/projects/${id}`, {
-      method: 'DELETE'
-    })
-    if (response.code === 0) {
-      fetchProjects()
-    }
-  } catch (error) {
-    console.error('删除项目失败:', error)
-  }
-}
-
-onMounted(() => {
-  fetchProjects()
-})
-</script>
-
 <style scoped>
-/* 项目页面样式 */
+/* 表格响应式优化 */
+@media (max-width: 1024px) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+  }
+}
+
+/* 自定义滚动条 */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
 </style>

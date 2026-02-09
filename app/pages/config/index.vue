@@ -6,7 +6,7 @@
     </div>
 
     <!-- 配置导航 -->
-    <div class="bg-white rounded-lg shadow-sm p-4">
+    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
       <nav class="flex space-x-4">
         <button
           v-for="tab in configTabs"
@@ -28,15 +28,16 @@
     <div v-if="activeTab === 'expense-categories'" class="space-y-6">
       <div class="flex justify-between items-center">
         <h2 class="text-lg font-semibold text-gray-800">费用类别管理</h2>
-        <button
+        <UButton
           @click="showAddCategoryModal = true"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          color="blue"
+          size="sm"
         >
           新增类别
-        </button>
+        </UButton>
       </div>
 
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
@@ -55,7 +56,7 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="category in expenseCategories" :key="category.id">
+            <tr v-for="category in expenseCategories" :key="category.id" class="hover:bg-gray-50 transition-colors">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">{{ category.name }}</div>
               </td>
@@ -66,18 +67,22 @@
                 {{ formatDate(category.created_at) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                <button
+                <UButton
                   @click="editCategory(category)"
-                  class="text-green-600 hover:text-green-900"
+                  color="green"
+                  size="sm"
+                  variant="text"
                 >
                   编辑
-                </button>
-                <button
+                </UButton>
+                <UButton
                   @click="deleteCategory(category.id)"
-                  class="text-red-600 hover:text-red-900"
+                  color="red"
+                  size="sm"
+                  variant="text"
                 >
                   删除
-                </button>
+                </UButton>
               </td>
             </tr>
           </tbody>
@@ -89,15 +94,16 @@
     <div v-if="activeTab === 'purchase-contents'" class="space-y-6">
       <div class="flex justify-between items-center">
         <h2 class="text-lg font-semibold text-gray-800">采购内容管理</h2>
-        <button
+        <UButton
           @click="showAddPurchaseModal = true"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          color="blue"
+          size="sm"
         >
           新增内容
-        </button>
+        </UButton>
       </div>
 
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
@@ -116,7 +122,7 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="content in purchaseContents" :key="content.id">
+            <tr v-for="content in purchaseContents" :key="content.id" class="hover:bg-gray-50 transition-colors">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">{{ content.name }}</div>
               </td>
@@ -127,18 +133,22 @@
                 {{ formatDate(content.created_at) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                <button
+                <UButton
                   @click="editPurchaseContent(content)"
-                  class="text-green-600 hover:text-green-900"
+                  color="green"
+                  size="sm"
+                  variant="text"
                 >
                   编辑
-                </button>
-                <button
+                </UButton>
+                <UButton
                   @click="deletePurchaseContent(content.id)"
-                  class="text-red-600 hover:text-red-900"
+                  color="red"
+                  size="sm"
+                  variant="text"
                 >
                   删除
-                </button>
+                </UButton>
               </td>
             </tr>
           </tbody>
@@ -150,15 +160,16 @@
     <div v-if="activeTab === 'employee-costs'" class="space-y-6">
       <div class="flex justify-between items-center">
         <h2 class="text-lg font-semibold text-gray-800">员工成本配置</h2>
-        <button
+        <UButton
           @click="showAddCostModal = true"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          color="blue"
+          size="sm"
         >
           新增配置
-        </button>
+        </UButton>
       </div>
 
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
@@ -180,7 +191,7 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="config in employeeCosts" :key="config.id">
+            <tr v-for="config in employeeCosts" :key="config.id" class="hover:bg-gray-50 transition-colors">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">{{ config.level_key }}</div>
               </td>
@@ -194,401 +205,336 @@
                 {{ formatDate(config.created_at) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                <button
+                <UButton
                   @click="editEmployeeCost(config)"
-                  class="text-green-600 hover:text-green-900"
+                  color="green"
+                  size="sm"
+                  variant="text"
                 >
                   编辑
-                </button>
-                <button
+                </UButton>
+                <UButton
                   @click="deleteEmployeeCost(config.id)"
-                  class="text-red-600 hover:text-red-900"
+                  color="red"
+                  size="sm"
+                  variant="text"
                 >
                   删除
-                </button>
+                </UButton>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+
     <!-- 新增费用类别模态框 -->
-    <div v-if="showAddCategoryModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div class="flex justify-between items-center p-6 border-b">
-          <h2 class="text-xl font-semibold text-gray-800">新增费用类别</h2>
-          <button
+    <UModal v-model="showAddCategoryModal" title="新增费用类别" :close-button="true">
+      <form @submit.prevent="addCategory">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">名称 *</label>
+            <UInput
+              v-model="categoryForm.name"
+              required
+              placeholder="请输入费用类别名称"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">排序号</label>
+            <UInput
+              type="number"
+              v-model="categoryForm.sort_order"
+              placeholder="请输入排序号"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">类型</label>
+            <div class="flex items-center space-x-4">
+              <label class="flex items-center">
+                <UCheckbox
+                  v-model="categoryForm.is_income"
+                  :value="true"
+                  class="mr-2"
+                />
+                收入
+              </label>
+              <label class="flex items-center">
+                <UCheckbox
+                  v-model="categoryForm.is_income"
+                  :value="false"
+                  class="mr-2"
+                />
+                支出
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <UButton
+            type="button"
             @click="showAddCategoryModal = false"
-            class="text-gray-400 hover:text-gray-600"
+            variant="outline"
+            size="sm"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            取消
+          </UButton>
+          <UButton
+            type="submit"
+            color="blue"
+            size="sm"
+          >
+            新增
+          </UButton>
         </div>
-        <div class="p-6">
-          <form @submit.prevent="addCategory">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">名称 *</label>
-              <input
-                v-model="categoryForm.name"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">排序号</label>
-              <input
-                type="number"
-                v-model="categoryForm.sort_order"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">类型</label>
-              <div class="flex items-center space-x-4">
-                <label class="flex items-center">
-                  <input
-                    type="radio"
-                    v-model="categoryForm.is_income"
-                    :value="true"
-                    class="mr-2"
-                  />
-                  收入
-                </label>
-                <label class="flex items-center">
-                  <input
-                    type="radio"
-                    v-model="categoryForm.is_income"
-                    :value="false"
-                    class="mr-2"
-                  />
-                  支出
-                </label>
-              </div>
-            </div>
-            <div class="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                @click="showAddCategoryModal = false"
-                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                取消
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                新增
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+      </form>
+    </UModal>
 
     <!-- 编辑费用类别模态框 -->
-    <div v-if="showEditCategoryModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div class="flex justify-between items-center p-6 border-b">
-          <h2 class="text-xl font-semibold text-gray-800">编辑费用类别</h2>
-          <button
+    <UModal v-model="showEditCategoryModal" title="编辑费用类别" :close-button="true">
+      <form @submit.prevent="updateCategory">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">名称 *</label>
+            <UInput
+              v-model="categoryForm.name"
+              required
+              placeholder="请输入费用类别名称"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">排序号</label>
+            <UInput
+              type="number"
+              v-model="categoryForm.sort_order"
+              placeholder="请输入排序号"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">类型</label>
+            <div class="flex items-center space-x-4">
+              <label class="flex items-center">
+                <UCheckbox
+                  v-model="categoryForm.is_income"
+                  :value="true"
+                  class="mr-2"
+                />
+                收入
+              </label>
+              <label class="flex items-center">
+                <UCheckbox
+                  v-model="categoryForm.is_income"
+                  :value="false"
+                  class="mr-2"
+                />
+                支出
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <UButton
+            type="button"
             @click="showEditCategoryModal = false"
-            class="text-gray-400 hover:text-gray-600"
+            variant="outline"
+            size="sm"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            取消
+          </UButton>
+          <UButton
+            type="submit"
+            color="blue"
+            size="sm"
+          >
+            保存修改
+          </UButton>
         </div>
-        <div class="p-6">
-          <form @submit.prevent="updateCategory">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">名称 *</label>
-              <input
-                v-model="categoryForm.name"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">排序号</label>
-              <input
-                type="number"
-                v-model="categoryForm.sort_order"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">类型</label>
-              <div class="flex items-center space-x-4">
-                <label class="flex items-center">
-                  <input
-                    type="radio"
-                    v-model="categoryForm.is_income"
-                    :value="true"
-                    class="mr-2"
-                  />
-                  收入
-                </label>
-                <label class="flex items-center">
-                  <input
-                    type="radio"
-                    v-model="categoryForm.is_income"
-                    :value="false"
-                    class="mr-2"
-                  />
-                  支出
-                </label>
-              </div>
-            </div>
-            <div class="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                @click="showEditCategoryModal = false"
-                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                取消
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                保存修改
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+      </form>
+    </UModal>
 
     <!-- 新增采购内容模态框 -->
-    <div v-if="showAddPurchaseModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div class="flex justify-between items-center p-6 border-b">
-          <h2 class="text-xl font-semibold text-gray-800">新增采购内容</h2>
-          <button
+    <UModal v-model="showAddPurchaseModal" title="新增采购内容" :close-button="true">
+      <form @submit.prevent="addPurchaseContent">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">名称 *</label>
+            <UInput
+              v-model="purchaseForm.name"
+              required
+              placeholder="请输入采购内容名称"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">排序号</label>
+            <UInput
+              type="number"
+              v-model="purchaseForm.sort_order"
+              placeholder="请输入排序号"
+            />
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <UButton
+            type="button"
             @click="showAddPurchaseModal = false"
-            class="text-gray-400 hover:text-gray-600"
+            variant="outline"
+            size="sm"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            取消
+          </UButton>
+          <UButton
+            type="submit"
+            color="blue"
+            size="sm"
+          >
+            新增
+          </UButton>
         </div>
-        <div class="p-6">
-          <form @submit.prevent="addPurchaseContent">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">名称 *</label>
-              <input
-                v-model="purchaseForm.name"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">排序号</label>
-              <input
-                type="number"
-                v-model="purchaseForm.sort_order"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                @click="showAddPurchaseModal = false"
-                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                取消
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                新增
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+      </form>
+    </UModal>
 
     <!-- 编辑采购内容模态框 -->
-    <div v-if="showEditPurchaseModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div class="flex justify-between items-center p-6 border-b">
-          <h2 class="text-xl font-semibold text-gray-800">编辑采购内容</h2>
-          <button
+    <UModal v-model="showEditPurchaseModal" title="编辑采购内容" :close-button="true">
+      <form @submit.prevent="updatePurchaseContent">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">名称 *</label>
+            <UInput
+              v-model="purchaseForm.name"
+              required
+              placeholder="请输入采购内容名称"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">排序号</label>
+            <UInput
+              type="number"
+              v-model="purchaseForm.sort_order"
+              placeholder="请输入排序号"
+            />
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <UButton
+            type="button"
             @click="showEditPurchaseModal = false"
-            class="text-gray-400 hover:text-gray-600"
+            variant="outline"
+            size="sm"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            取消
+          </UButton>
+          <UButton
+            type="submit"
+            color="blue"
+            size="sm"
+          >
+            保存修改
+          </UButton>
         </div>
-        <div class="p-6">
-          <form @submit.prevent="updatePurchaseContent">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">名称 *</label>
-              <input
-                v-model="purchaseForm.name"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">排序号</label>
-              <input
-                type="number"
-                v-model="purchaseForm.sort_order"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                @click="showEditPurchaseModal = false"
-                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                取消
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                保存修改
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+      </form>
+    </UModal>
 
     <!-- 新增员工成本配置模态框 -->
-    <div v-if="showAddCostModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div class="flex justify-between items-center p-6 border-b">
-          <h2 class="text-xl font-semibold text-gray-800">新增员工成本配置</h2>
-          <button
+    <UModal v-model="showAddCostModal" title="新增员工成本配置" :close-button="true">
+      <form @submit.prevent="addEmployeeCost">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">级别标识 *</label>
+            <UInput
+              v-model="costForm.level_key"
+              required
+              placeholder="请输入级别标识"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">级别名称 *</label>
+            <UInput
+              v-model="costForm.level_name"
+              required
+              placeholder="请输入级别名称"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">日成本 (元) *</label>
+            <UInput
+              type="number"
+              v-model="costForm.daily_cost"
+              required
+              step="0.01"
+              placeholder="请输入日成本"
+            />
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <UButton
+            type="button"
             @click="showAddCostModal = false"
-            class="text-gray-400 hover:text-gray-600"
+            variant="outline"
+            size="sm"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            取消
+          </UButton>
+          <UButton
+            type="submit"
+            color="blue"
+            size="sm"
+          >
+            新增
+          </UButton>
         </div>
-        <div class="p-6">
-          <form @submit.prevent="addEmployeeCost">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">级别标识 *</label>
-              <input
-                v-model="costForm.level_key"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">级别名称 *</label>
-              <input
-                v-model="costForm.level_name"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">日成本 (元) *</label>
-              <input
-                type="number"
-                v-model="costForm.daily_cost"
-                required
-                step="0.01"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                @click="showAddCostModal = false"
-                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                取消
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                新增
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+      </form>
+    </UModal>
 
     <!-- 编辑员工成本配置模态框 -->
-    <div v-if="showEditCostModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div class="flex justify-between items-center p-6 border-b">
-          <h2 class="text-xl font-semibold text-gray-800">编辑员工成本配置</h2>
-          <button
+    <UModal v-model="showEditCostModal" title="编辑员工成本配置" :close-button="true">
+      <form @submit.prevent="updateEmployeeCost">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">级别标识 *</label>
+            <UInput
+              v-model="costForm.level_key"
+              required
+              placeholder="请输入级别标识"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">级别名称 *</label>
+            <UInput
+              v-model="costForm.level_name"
+              required
+              placeholder="请输入级别名称"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">日成本 (元) *</label>
+            <UInput
+              type="number"
+              v-model="costForm.daily_cost"
+              required
+              step="0.01"
+              placeholder="请输入日成本"
+            />
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <UButton
+            type="button"
             @click="showEditCostModal = false"
-            class="text-gray-400 hover:text-gray-600"
+            variant="outline"
+            size="sm"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            取消
+          </UButton>
+          <UButton
+            type="submit"
+            color="blue"
+            size="sm"
+          >
+            保存修改
+          </UButton>
         </div>
-        <div class="p-6">
-          <form @submit.prevent="updateEmployeeCost">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">级别标识 *</label>
-              <input
-                v-model="costForm.level_key"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">级别名称 *</label>
-              <input
-                v-model="costForm.level_name"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">日成本 (元) *</label>
-              <input
-                type="number"
-                v-model="costForm.daily_cost"
-                required
-                step="0.01"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div class="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                @click="showEditCostModal = false"
-                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                取消
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                保存修改
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+      </form>
+    </UModal>
   </div>
 </template>
 

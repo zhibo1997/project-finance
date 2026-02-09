@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises'
 import { join } from 'path'
-import { error } from '~/server/utils/response'
+import { error } from '../../utils/response'
 
 export default defineEventHandler(async (event) => {
   const filename = event.context.params?.filename
