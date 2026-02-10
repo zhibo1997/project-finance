@@ -1,72 +1,47 @@
-import type { UserRole } from '~/types/user'
-
-interface User {
-  name: string
-  email: string
-  role: UserRole
-}
-
-interface RoleConfig {
-  description: string
-}
+import type { UserInfo } from '~/server/utils/auth'
 
 export const useAuth = () => {
-  const currentUser = useState<User>('currentUser', () => ({
-    name: '张三',
-    email: 'zhangsan@example.com',
-    role: 'admin'
-  }))
+  const currentUser = ref<UserInfo>({
+    id: '1',
+    role: 'admin',
+    name: '管理员'
+  })
 
-  const currentRoleConfig = useState<RoleConfig>('currentRoleConfig', () => ({
-    description: '您可以查看和管理所有项目'
-  }))
-
-  const roleConfigs: Record<UserRole, RoleConfig> = {
-    admin: {
-      description: '您可以查看和管理所有项目'
-    },
-    project_manager: {
-      description: '您可以查看和管理您负责的项目'
-    },
-    project_member: {
-      description: '您可以查看您参与的项目'
+  // 从 localStorage 加载用户信息
+  const loadUserFromStorage = () => {
+    if (process.client) {
+      const savedUser = localStorage.getItem('currentUser')
+      if (savedUser) {
+        currentUser.value = JSON.parse(savedUser)
+      }
     }
   }
 
-  const switchRole = (role: UserRole) => {
-    currentUser.value.role = role
-    currentRoleConfig.value = roleConfigs[role]
+  // 保存用户信息到 localStorage
+  const saveUserToStorage = (user: UserInfo) => {
+    if (process.client) {
+      localStorage.setItem('currentUser', JSON.stringify(user))
+    }
   }
 
-  const initAuth = () => {
-    currentRoleConfig.value = roleConfigs[currentUser.value.role]
+  // 切换角色
+  const switchRole = (role: UserInfo['role'], name: string) => {
+    const newUser: UserInfo = {
+      id: role === 'admin' ? '1' : role === 'project_manager' ? '2' : '3',
+      role,
+      name
+    }
+    currentUser.value = newUser
+    saveUserToStorage(newUser)
   }
 
-  const canViewAllProjects = computed(() => currentUser.value.role === 'admin')
-
-  const canCreateProjects = computed(() => currentUser.value.role === 'admin')
-
-  const canBookkeepingIncome = computed(() =>
-    currentUser.value.role === 'admin' || currentUser.value.role === 'project_manager'
-  )
-
-  const canBookkeepingExpense = computed(() =>
-    currentUser.value.role === 'admin' || currentUser.value.role === 'project_manager' || currentUser.value.role === 'project_member'
-  )
-
-  const canEditProjects = computed(() =>
-    currentUser.value.role === 'admin' || currentUser.value.role === 'project_manager'
-  )
+  // 初始化
+  if (process.client) {
+    loadUserFromStorage()
+  }
 
   return {
     currentUser,
-    currentRoleConfig,
-    switchRole,
-    initAuth,
-    canViewAllProjects,
-    canCreateProjects,
-    canBookkeepingIncome,
-    canBookkeepingExpense,
-    canEditProjects
+    switchRole
   }
 }

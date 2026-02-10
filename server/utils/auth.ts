@@ -1,66 +1,23 @@
-export type UserRole = 'admin' | 'project_manager' | 'project_member'
+import type { H3Event } from 'h3'
 
 export interface UserInfo {
   id: string
+  role: 'admin' | 'project_manager' | 'project_member'
   name: string
-  role: UserRole
-  email: string
 }
 
-export interface RoleConfig {
-  role: UserRole
-  label: string
-  description: string
-  canViewAllProjects: boolean
-  canCreateProjects: boolean
-  canBookkeeping: {
-    income: boolean
-    expense: boolean
+/**
+ * 从请求头读取用户信息
+ * 无 header 时返回默认 admin 角色（便于开发调试）
+ */
+export const getUserFromEvent = (event: H3Event): UserInfo => {
+  const userId = getHeader(event, 'x-user-id') || '1'
+  const userRole = (getHeader(event, 'x-user-role') || 'admin') as UserInfo['role']
+  const userName = getHeader(event, 'x-user-name') || '管理员'
+
+  return {
+    id: userId,
+    role: userRole,
+    name: userName
   }
-  canEditProjects: boolean
-}
-
-export const ROLE_CONFIGS: Record<UserRole, RoleConfig> = {
-  admin: {
-    role: 'admin',
-    label: '管理员',
-    description: '拥有全部权限',
-    canViewAllProjects: true,
-    canCreateProjects: true,
-    canBookkeeping: {
-      income: true,
-      expense: true
-    },
-    canEditProjects: true
-  },
-  project_manager: {
-    role: 'project_manager',
-    label: '项目经理',
-    description: '可管理自己负责的项目，支持立项和记账',
-    canViewAllProjects: false,
-    canCreateProjects: true,
-    canBookkeeping: {
-      income: true,
-      expense: true
-    },
-    canEditProjects: true
-  },
-  project_member: {
-    role: 'project_member',
-    label: '项目成员',
-    description: '可查看参与的项目，只能进行支出记账',
-    canViewAllProjects: false,
-    canCreateProjects: false,
-    canBookkeeping: {
-      income: false,
-      expense: true
-    },
-    canEditProjects: false
-  }
-}
-
-export const MOCK_USERS: Record<UserRole, UserInfo> = {
-  admin: { id: '1', name: '张管理员', role: 'admin', email: 'admin@company.com' },
-  project_manager: { id: '2', name: '赵六', role: 'project_manager', email: 'manager@company.com' },
-  project_member: { id: '3', name: '王成员', role: 'project_member', email: 'member@company.com' }
 }

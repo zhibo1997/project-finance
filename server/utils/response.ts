@@ -1,13 +1,20 @@
-export interface ApiResponse<T = any> {
-  code: number
-  message: string
-  data?: T
+/**
+ * 成功响应
+ */
+export const successResponse = (data?: any, message = 'ok') => {
+  return {
+    code: 0,
+    message,
+    data
+  }
 }
 
-export function success<T>(data: T, message = 'ok'): ApiResponse<T> {
-  return { code: 0, message, data }
-}
-
-export function error(message: string, code = -1): ApiResponse {
-  return { code, message }
+/**
+ * 错误响应
+ */
+export const errorResponse = (message: string, code = -1) => {
+  return {
+    code,
+    message
+  }
 }

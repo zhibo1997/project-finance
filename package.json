@@ -21,7 +21,11 @@
     "echarts": "^5.x",
     "exceljs": "^4.x",
     "lucide-vue-next": "^0.563.0",
+    "naive-ui": "^2.43.2",
     "nuxt": "^4.x",
+    "nuxtjs-naive-ui": "^1.0.2",
+    "unplugin-auto-import": "^21.0.0",
+    "unplugin-vue-components": "^31.0.0",
     "vue": "^3.x"
   },
   "devDependencies": {

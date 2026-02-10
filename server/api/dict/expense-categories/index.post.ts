@@ -3,22 +3,22 @@ import { successResponse, errorResponse } from '../../../utils/response'
 
 export default defineEventHandler(async (event) => {
   try {
-    const id = getRouterParam(event, 'id')
     const body = await readBody(event)
 
-    const expenseCategory = await prisma.expense_categories.update({
-      where: {
-        id
-      },
+    if (!body.name) {
+      return errorResponse('费用类别名称不能为空')
+    }
+
+    const expenseCategory = await prisma.expense_categories.create({
       data: {
         name: body.name,
-        sort_order: body.sort_order
+        sort_order: body.sort_order || 0
       }
     })
 
     return successResponse(expenseCategory)
   } catch (error) {
-    console.error('更新费用类别失败:', error)
-    return errorResponse('更新费用类别失败')
+    console.error('创建费用类别失败:', error)
+    return errorResponse('创建费用类别失败')
   }
 })

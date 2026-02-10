@@ -1,48 +1,53 @@
-import prisma from '../../../utils/db'
-import { success, error } from '../../../utils/response'
+import prisma from '../../../utils/prisma'
+import { successResponse, errorResponse } from '../../../utils/response'
+import { getUserFromEvent } from '../../../utils/auth'
 
 export default defineEventHandler(async (event) => {
-  const id = event.context.params?.id
-  const original = await prisma.projects.findUnique({ where: { id } })
-
-  if (!original) {
-    return error('项目不存在')
-  }
-
   try {
-    const formData = original.form_data as any
-    formData.basicInfo.projectName = `${formData.basicInfo.projectName} copy`
+    const id = getRouterParam(event, 'id')
+    const user = getUserFromEvent(event)
 
-    const newProject = await prisma.projects.create({
-      data: {
-        ...original,
-        id: undefined, // 让 Prisma 自动生成新的 UUID
-        status: 'draft',
-        form_data: formData,
-        created_at: new Date(),
-        updated_at: new Date()
+    const existingProject = await prisma.projects.findUnique({
+      where: { id },
+      include: {
+        project_members: true
       }
     })
 
-    // 复制项目成员
-    const members = await prisma.project_members.findMany({
-      where: { project_id: id }
-    })
-
-    if (members.length > 0) {
-      await prisma.project_members.createMany({
-        data: members.map(member => ({
-          ...member,
-          id: undefined,
-          project_id: newProject.id,
-          created_at: new Date()
-        }))
-      })
+    if (!existingProject) {
+      return errorResponse('项目不存在')
     }
 
-    return success(newProject)
-  } catch (error: any) {
+    // 仅 COMPLETED/CLOSED 状态可复制
+    if (!['COMPLETED', 'CLOSED'].includes(existingProject.status)) {
+      return errorResponse('只有已完成或已关闭的项目才能复制')
+    }
+
+    const newProject = await prisma.projects.create({
+      data: {
+        project_name: `${existingProject.project_name} copy`,
+        project_leader: existingProject.project_leader,
+        client_name: existingProject.client_name,
+        project_type: existingProject.project_type,
+        service_start_date: null,
+        service_end_date: null,
+        service_amount: existingProject.service_amount,
+        status: 'DRAFT',
+        form_data: existingProject.form_data,
+        created_by: user.id,
+        project_members: {
+          create: existingProject.project_members.map(member => ({
+            user_id: member.user_id,
+            user_name: member.user_name,
+            role: member.role
+          }))
+        }
+      }
+    })
+
+    return successResponse(newProject)
+  } catch (error) {
     console.error('复制项目失败:', error)
-    return error('复制项目失败: ' + error.message)
+    return errorResponse('复制项目失败')
   }
 })

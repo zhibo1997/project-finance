@@ -1,21 +1,19 @@
-import prisma from '../../utils/db'
-import { success, error } from '../../utils/response'
+import prisma from '../../../utils/prisma'
+import { successResponse, errorResponse } from '../../../utils/response'
 
 export default defineEventHandler(async (event) => {
   try {
-    const id = event.context.params?.id
-
-    if (!id) {
-      return error('缺少采购内容ID')
-    }
+    const id = getRouterParam(event, 'id')
 
     await prisma.purchase_contents.delete({
-      where: { id }
+      where: {
+        id
+      }
     })
 
-    return success(null, '删除成功')
-  } catch (err: any) {
-    console.error('删除采购内容失败:', err)
-    return error(err.message || '删除采购内容失败')
+    return successResponse(null, '删除成功')
+  } catch (error) {
+    console.error('删除采购内容失败:', error)
+    return errorResponse('删除采购内容失败')
   }
 })
