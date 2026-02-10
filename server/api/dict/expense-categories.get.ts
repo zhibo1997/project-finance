@@ -7,9 +7,15 @@ export default defineEventHandler(async (event) => {
       orderBy: { sort_order: 'asc' }
     })
 
-    return success(categories)
-  } catch (error: any) {
-    console.error('获取费用类别失败:', error)
-    return error('获取费用类别失败: ' + error.message)
+    const formatted = categories.map(cat => ({
+      id: cat.id,
+      name: cat.name,
+      sortOrder: cat.sort_order
+    }))
+
+    return success(formatted)
+  } catch (err: any) {
+    console.error('获取费用类别失败:', err)
+    return error(err.message || '获取费用类别失败')
   }
 })

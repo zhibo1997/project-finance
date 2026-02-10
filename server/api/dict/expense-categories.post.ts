@@ -4,22 +4,26 @@ import { success, error } from '../../utils/response'
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
-    const { name, sort_order = 0 } = body
+    const { name, sortOrder = 0 } = body
 
     if (!name) {
-      return error('类别名称不能为空')
+      return error('费用类别名称不能为空')
     }
 
-    const newCategory = await prisma.expense_categories.create({
+    const category = await prisma.expense_categories.create({
       data: {
         name,
-        sort_order
+        sort_order: sortOrder
       }
     })
 
-    return success(newCategory)
-  } catch (error: any) {
-    console.error('创建费用类别失败:', error)
-    return error('创建费用类别失败: ' + error.message)
+    return success({
+      id: category.id,
+      name: category.name,
+      sortOrder: category.sort_order
+    })
+  } catch (err: any) {
+    console.error('创建费用类别失败:', err)
+    return error(err.message || '创建费用类别失败')
   }
 })

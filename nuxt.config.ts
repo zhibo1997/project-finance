@@ -5,8 +5,8 @@ export default defineNuxtConfig({
   // 关闭 SSR（客户端渲染模式）
   ssr: false,
 
-  // 模块配置 - 添加 Tailwind CSS 模块
-  modules: ['@nuxtjs/tailwindcss'],
+  // 模块配置 - 添加 Nuxt UI 和 Tailwind CSS 模块
+  modules: ['@nuxt/ui', '@nuxtjs/tailwindcss'],
 
   // 目录结构配置
   srcDir: "app/",

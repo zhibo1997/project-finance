@@ -1,21 +1,21 @@
-import prisma from '../../../utils/db'
-import { success, error } from '../../../utils/response'
+import prisma from '../../utils/db'
+import { success, error } from '../../utils/response'
 
 export default defineEventHandler(async (event) => {
-  const id = event.context.params?.id
-
-  if (!id) {
-    return error('类别ID不能为空')
-  }
-
   try {
+    const id = event.context.params?.id
+
+    if (!id) {
+      return error('缺少费用类别ID')
+    }
+
     await prisma.expense_categories.delete({
       where: { id }
     })
 
     return success(null, '删除成功')
-  } catch (error: any) {
-    console.error('删除费用类别失败:', error)
-    return error('删除费用类别失败: ' + error.message)
+  } catch (err: any) {
+    console.error('删除费用类别失败:', err)
+    return error(err.message || '删除费用类别失败')
   }
 })

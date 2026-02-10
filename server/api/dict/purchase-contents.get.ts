@@ -7,9 +7,15 @@ export default defineEventHandler(async (event) => {
       orderBy: { sort_order: 'asc' }
     })
 
-    return success(contents)
-  } catch (error: any) {
-    console.error('获取采购内容失败:', error)
-    return error('获取采购内容失败: ' + error.message)
+    const formatted = contents.map(content => ({
+      id: content.id,
+      name: content.name,
+      sortOrder: content.sort_order
+    }))
+
+    return success(formatted)
+  } catch (err: any) {
+    console.error('获取采购内容失败:', err)
+    return error(err.message || '获取采购内容失败')
   }
 })

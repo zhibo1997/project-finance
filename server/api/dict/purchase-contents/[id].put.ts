@@ -1,28 +1,31 @@
-import prisma from '../../../utils/db'
-import { success, error } from '../../../utils/response'
+import prisma from '../../utils/db'
+import { success, error } from '../../utils/response'
 
 export default defineEventHandler(async (event) => {
-  const id = event.context.params?.id
-
-  if (!id) {
-    return error('采购内容ID不能为空')
-  }
-
   try {
+    const id = event.context.params?.id
     const body = await readBody(event)
-    const { name, sort_order } = body
+    const { name, sortOrder } = body
 
-    const updatedContent = await prisma.purchase_contents.update({
+    if (!id) {
+      return error('缺少采购内容ID')
+    }
+
+    const content = await prisma.purchase_contents.update({
       where: { id },
       data: {
-        ...(name && { name }),
-        ...(sort_order !== undefined && { sort_order })
+        ...(name !== undefined && { name }),
+        ...(sortOrder !== undefined && { sort_order: sortOrder })
       }
     })
 
-    return success(updatedContent)
-  } catch (error: any) {
-    console.error('更新采购内容失败:', error)
-    return error('更新采购内容失败: ' + error.message)
+    return success({
+      id: content.id,
+      name: content.name,
+      sortOrder: content.sort_order
+    })
+  } catch (err: any) {
+    console.error('更新采购内容失败:', err)
+    return error(err.message || '更新采购内容失败')
   }
 })

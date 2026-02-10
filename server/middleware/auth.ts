@@ -1,13 +1,11 @@
-import { MOCK_USERS, ROLE_CONFIGS } from '../utils/auth'
-
 export default defineEventHandler((event) => {
-  // 模拟用户认证 - 在实际项目中应该使用真实的认证机制
-  const mockRole = getCookie(event, 'mock-role') || 'admin'
-  const user = MOCK_USERS[mockRole as keyof typeof MOCK_USERS] || MOCK_USERS.admin
+  // 简单的身份认证中间件
+  // 目前不接入登录，所有请求都通过
+  event.context.user = {
+    id: 'mock-user-id',
+    name: '测试用户',
+    role: 'admin' // 可以是 admin, manager, member
+  }
 
-  // 将用户信息添加到事件上下文中
-  event.context.user = user
-  event.context.roleConfig = ROLE_CONFIGS[user.role]
-
-  console.log(`User ${user.name} (${user.role}) accessed: ${event.node.req.url}`)
+  return
 })

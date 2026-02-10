@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Plus, CheckCircle, Clock, LayoutGrid, Edit3, User, Shield, Users, Building2 } from 'lucide-vue-next'
-import { PROJECT_LIST_DATA, type Project, type ProjectStatus, formatCurrency } from '~/data/projectListData'
 import { useAuth } from '~/composables/useAuth'
 import type { UserRole } from '~/types/user'
 
-const projects = ref<Project[]>(PROJECT_LIST_DATA)
-const statusFilter = ref<ProjectStatus | 'all'>('all')
+const projects = ref<any[]>([])
+const statusFilter = ref<string | 'all'>('all')
 
 // 权限管理
 const {
@@ -21,8 +20,30 @@ const {
   canEditProjects
 } = useAuth()
 
-onMounted(() => {
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('zh-CN', {
+    style: 'currency',
+    currency: 'CNY',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount)
+}
+
+// 从 API 获取项目列表
+const fetchProjects = async () => {
+  try {
+    const response = await $fetch('/api/projects') as any
+    if (response.code === 0) {
+      projects.value = response.data?.list || []
+    }
+  } catch (error) {
+    console.error('获取项目列表失败:', error)
+  }
+}
+
+onMounted(async () => {
   initAuth()
+  await fetchProjects()
 })
 
 // 根据角色过滤项目
@@ -33,13 +54,13 @@ const filteredProjects = computed(() => {
   if (!canViewAllProjects.value) {
     // 项目经理只能看到自己负责的项目
     if (currentUser.value.role === 'project_manager') {
-      filtered = filtered.filter(project => project.projectLeader === currentUser.value.name)
+      filtered = filtered.filter(project => project.project_leader === currentUser.value.name)
     }
     // 项目成员只能看到自己参与的项目（这里简化为看到所有项目，实际需要根据成员列表过滤）
     // 为了演示，项目成员也只能看到特定项目
     if (currentUser.value.role === 'project_member') {
       // 假设项目成员只能看到赵六和王五负责的项目
-      filtered = filtered.filter(project => ['赵六', '王五'].includes(project.projectLeader))
+      filtered = filtered.filter(project => ['赵六', '王五'].includes(project.project_leader))
     }
   }
 
@@ -148,9 +169,9 @@ const navigateToDashboard = () => {
                 全部
               </UButton>
               <UButton
-                @click="statusFilter = '已完成'"
+                @click="statusFilter = 'completed'"
                 size="sm"
-                :class="statusFilter === '已完成'
+                :class="statusFilter === 'completed'
                   ? 'bg-green-100 text-green-700'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
                 class="rounded-full px-3 py-1.5 flex items-center gap-1"
@@ -159,9 +180,9 @@ const navigateToDashboard = () => {
                 已完成
               </UButton>
               <UButton
-                @click="statusFilter = '立项中'"
+                @click="statusFilter = 'draft'"
                 size="sm"
-                :class="statusFilter === '立项中'
+                :class="statusFilter === 'draft'
                   ? 'bg-yellow-100 text-yellow-700'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
                 class="rounded-full px-3 py-1.5 flex items-center gap-1"
@@ -218,32 +239,28 @@ const navigateToDashboard = () => {
                   >
                     <!-- 左侧固定列 -->
                     <td class="px-3 py-2 font-medium text-gray-900 bg-white sticky left-0 z-20">{{ project.id }}</td>
-                    <td class="px-3 py-2 bg-white sticky left-[120px] z-10 font-medium text-gray-900 max-w-[200px] truncate" :title="project.projectName">{{ project.projectName }}</td>
-                    <td class="px-3 py-2 bg-white sticky left-[320px] z-10 text-gray-700">{{ project.projectLeader }}</td>
-                    <td class="px-3 py-2 bg-white sticky left-[420px] z-10 text-gray-700 max-w-[150px] truncate" :title="project.clientName">{{ project.clientName }}</td>
+                    <td class="px-3 py-2 bg-white sticky left-[120px] z-10 font-medium text-gray-900 max-w-[200px] truncate" :title="project.project_name">{{ project.project_name }}</td>
+                    <td class="px-3 py-2 bg-white sticky left-[320px] z-10 text-gray-700">{{ project.project_leader }}</td>
+                    <td class="px-3 py-2 bg-white sticky left-[420px] z-10 text-gray-700 max-w-[150px] truncate" :title="project.client_name">{{ project.client_name }}</td>
                     <!-- 可滚动列 -->
-                    <td class="px-3 py-2 text-gray-700">{{ project.serviceStartDate }}</td>
-                    <td class="px-3 py-2 text-gray-700">{{ project.serviceEndDate }}</td>
-                    <td class="px-3 py-2 font-semibold text-green-600">{{ formatCurrency(project.serviceAmount) }}</td>
+                    <td class="px-3 py-2 text-gray-700">{{ project.service_start_date ? new Date(project.service_start_date).toLocaleDateString('zh-CN') : '-' }}</td>
+                    <td class="px-3 py-2 text-gray-700">{{ project.service_end_date ? new Date(project.service_end_date).toLocaleDateString('zh-CN') : '-' }}</td>
+                    <td class="px-3 py-2 font-semibold text-green-600">{{ formatCurrency(project.service_amount || 0) }}</td>
                     <td class="px-3 py-2">
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                        :class="project.isCrossYear
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-100 text-gray-800'"
-                      >
-                        {{ project.isCrossYear ? '是' : '否' }}
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        否
                       </span>
                     </td>
                     <td class="px-3 py-2">
                       <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                        :class="project.status === '已完成'
+                        :class="project.status === 'completed'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-yellow-100 text-yellow-800'"
                       >
-                        {{ project.status === '已完成' ? '已完成' : '立项中' }}
+                        {{ project.status === 'completed' ? '已完成' : project.status === 'submitted' ? '已提交' : project.status === 'closed' ? '已结项' : '立项中' }}
                       </span>
                     </td>
-                    <td class="px-3 py-2 text-gray-700">{{ project.projectType }}</td>
+                    <td class="px-3 py-2 text-gray-700">{{ project.project_type }}</td>
                     <!-- 右侧固定列 -->
                     <td class="px-3 py-2 bg-white sticky right-0 z-20">
                       <div class="flex items-center gap-2">

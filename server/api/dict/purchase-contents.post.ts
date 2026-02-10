@@ -4,22 +4,26 @@ import { success, error } from '../../utils/response'
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
-    const { name, sort_order = 0 } = body
+    const { name, sortOrder = 0 } = body
 
     if (!name) {
       return error('采购内容名称不能为空')
     }
 
-    const newContent = await prisma.purchase_contents.create({
+    const content = await prisma.purchase_contents.create({
       data: {
         name,
-        sort_order
+        sort_order: sortOrder
       }
     })
 
-    return success(newContent)
-  } catch (error: any) {
-    console.error('创建采购内容失败:', error)
-    return error('创建采购内容失败: ' + error.message)
+    return success({
+      id: content.id,
+      name: content.name,
+      sortOrder: content.sort_order
+    })
+  } catch (err: any) {
+    console.error('创建采购内容失败:', err)
+    return error(err.message || '创建采购内容失败')
   }
 })
