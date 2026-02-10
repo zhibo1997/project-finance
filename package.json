@@ -25,12 +25,10 @@
     "vue": "^3.x"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^25.2.2",
     "postcss": "^8.5.6",
     "prisma": "^5.x",
-    "puppeteer": "^24.37.2",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^3.4.19",
     "typescript": "^5.4.x",
     "vue-tsc": "^3.2.4"
   }
